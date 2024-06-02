@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  spring-app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+
+  react-app:
+    build:
+      context: ./KLIENT/
+      dockerfile: Dockerfile
+    container_name: react-app
+    ports:
+      - "3000:3000"
+    networks:
+      - my-network
+
+
+networks:
+  my-network:
+    driver: bridge

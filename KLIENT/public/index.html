@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+</head>
+
+<body>
+<div id="Biblioteka"></div>
+
+<script type="text/babel">
+
+    function BibliotekaHook() {
+
+        const [status, setStatus] = React.useState("OK");
+        const [wypozyczenia, setWypozyczenia] = React.useState([]);
+        const [ksiazki, setKsiazki] = React.useState([]);
+        const [czytelnicy, setCzytelnicy] = React.useState([]);
+        const [textArea, setTextArea] = React.useState("Brak danych");
+        const [newFirstname, setNewFirstname] = React.useState("adam");
+        const [newLastname, setNewLastname] = React.useState("nowak");
+        const [newTitle, setNewTitle] = React.useState("title");
+        const [newAuthor, setNewAuthor] = React.useState("author");
+        const [newISBN, setNewISBN] = React.useState("00-0-isbn");
+        const [newDate, setNewDate] = React.useState("22-12-2023");
+        const [newReturnDate, setNewReturnDate] = React.useState("10-10-2024");
+        const [newKsiazkaID, setNewKsiazkaID] = React.useState("1");
+        const [newCzytelnikID, setNewCzytelnikID] = React.useState("1");
+        const [wypIDToDelete, setWypIDToDelete] = React.useState("1");
+        const [czytelnikIDToFind, setCzytelnikIDToFind] = React.useState("1");
+        const [czytelnikIDToDelete, setCzytelnikIDToDelete] = React.useState("1");
+        const [ksiazkaIDToFind, setKsiazkaIDToFind] = React.useState("1");
+        const [ksiazkaIDToDelete, setKsiazkaIDToDelete] = React.useState("1");
+        const [wypIDToEnd, setWypIDToEnd] = React.useState("1");
+
+        //wypozyczenia na serwer
+        async function addWypozyczenie() {
+
+            let czytelnikId = newCzytelnikID;
+            let ksiazkaId = newKsiazkaID;
+            let date = newDate;
+//dodanie wypozyczenia
+            if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
+                await axios.post('http://localhost:8081/addwyp/',
+                    { czytelnikId, ksiazkaId, date }, //Podajemy parametry
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("Zadna z danych wstawianego wypozyczenia nie moze byc pusta");
+            }
+        }
+async function addCzytelnik() {
+
+            let firstname = newFirstname;
+            let lastname = newLastname;
+
+//dodanie czytelnika
+            if ((firstname.length > 0) && (lastname.length > 0) ) {
+                await axios.post('http://localhost:8081/addczytelnik/',
+                    { firstname, lastname}, //Podajemy parametry
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("Zadna z danych dodawanego czytelnika nie moze byc pusta");
+            }
+        }
+        //dodanie ksiazki
+        async function addKsiazka() {
+
+            let title = newTitle;
+            let author = newAuthor;
+            let isbn = newISBN;
+
+            if ((title.length > 0) && (author.length > 0) && (isbn.length > 0) ) {
+                await axios.post('http://localhost:8081/addksiazka/',
+                    { title, author,isbn}, //Podajemy parametry
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("Zadna z danych dodawanej książki nie moze byc pusta");
+            }
+        }
+ //Pobranie listy czytelnikow z serwera
+        async function getCzytelnicy() {
+
+            await axios.post('http://localhost:8081/getczytelnicy/')
+                .then(response => {
+
+                    let wypListText = ""
+
+                    response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.firstname;
+                        let llastname = e.lastname;
+
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + "\n";
+                            setTextArea(wypListText);
+                            setCzytelnicy(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+                }).catch(err => {
+                    let myerror = "Blad polaczenia sieciowego." + err;
+                    setStatus(myerror);
+                });
+
+        }
+         //Pobranie listy ksiazek z serwera
+        async function getKsiazki() {
+
+            await axios.post('http://localhost:8081/getksiazki/')
+                .then(response => {
+
+                    let wypListText = ""
+
+                    response.data.forEach((e) => {
+                        let lid = e.id;
+                        let ltitle = e.title;
+                        let lauthor = e.author;
+                        let lisbn = e.isbn;
+
+                        let firstPartText = ltitle.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + ltitle + ", " + lauthor + ", "+ lisbn + "\n";
+                            setTextArea(wypListText);
+                            setKsiazki(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = ltitle.substring(("ERROR:").length, ltitle.length);
+                            wypListText = ltitle + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+                }).catch(err => {
+                    let myerror = "Blad polaczenia sieciowego." + err;
+                    setStatus(myerror);
+                });
+
+        }
+        //Pobranie listy wypozyczen z serwera
+        async function getWypozyczenia() {
+
+            await axios.post('http://localhost:8081/getwyp/')
+                .then(response => {
+
+                    let wypListText = ""
+
+                    response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.czytelnikFirstname;
+                        let llastname = e.czytelnikLastname;
+                        let ldate = e.date;
+                        let lreturndate = e.returndate;
+                        let ltitle = e.ksiazkaTitle;
+                        let lauthor = e.ksiazkaAuthor;
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + ", " + ltitle + ", " + lauthor + ", " + ldate + ", " + lreturndate + "\n";
+                            setTextArea(wypListText);
+                            setWypozyczenia(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+                }).catch(err => {
+                    let myerror = "Blad polaczenia sieciowego." + err;
+                    setStatus(myerror);
+                });
+
+        }
+
+        //Pobranie listy wypozyczen z serwera
+        async function getReturnedWypozyczenia() {
+
+            await axios.post('http://localhost:8081/getreturnedwyp/')
+                .then(response => {
+
+                    let wypListText = ""
+
+                    response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.czytelnikFirstname;
+                        let llastname = e.czytelnikLastname;
+                        let ldate = e.date;
+                        let lreturndate = e.returndate;
+                        let ltitle = e.ksiazkaTitle;
+                        let lauthor = e.ksiazkaAuthor;
+
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + ", " + ltitle + ", " + lauthor + ", " + ldate + ", " + lreturndate + "\n";
+                            setTextArea(wypListText);
+                            setWypozyczenia(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+                }).catch(err => {
+                    let myerror = "Blad polaczenia sieciowego." + err;
+                    setStatus(myerror);
+                });
+
+        }
+
+        //Pobranie listy wypozyczen z serwera
+        async function getUnreturnedWypozyczenia() {
+
+            await axios.post('http://localhost:8081/getunreturnedwyp/')
+                .then(response => {
+
+                    let wypListText = ""
+
+                    response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.czytelnikFirstname;
+                        let llastname = e.czytelnikLastname;
+                        let ldate = e.date;
+                        let lreturndate = e.returndate;
+                        let ltitle = e.ksiazkaTitle;
+                        let lauthor = e.ksiazkaAuthor;
+
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + ", " + ltitle + ", " + lauthor + ", " + ldate + ", " + lreturndate + "\n";
+                            setTextArea(wypListText);
+                            setWypozyczenia(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+                }).catch(err => {
+                    let myerror = "Blad polaczenia sieciowego." + err;
+                    setStatus(myerror);
+                });
+
+        }
+
+        async function deleteCzytelnik() {
+
+            let czytidtodelete = czytelnikIDToDelete;
+
+            if (czytidtodelete.length > 0) {
+
+                await axios.post('http://localhost:8081/deleteczytelnik/',
+                    { czytidtodelete }, //Podajemy parametr
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID czytelnika nie moze być puste!");
+            }
+        }
+        async function deleteKsiazka() {
+
+            let ksidtodelete = ksiazkaIDToDelete;
+
+            if (ksidtodelete.length > 0) {
+
+                await axios.post('http://localhost:8081/deleteksiazka/',
+                    { ksidtodelete }, //Podajemy parametr
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID ksiazki nie moze być puste!");
+            }
+        }
+        async function deleteWypozyczenie() {
+
+            let wypidtodelete = wypIDToDelete;
+
+            if (wypidtodelete.length > 0) {
+
+                await axios.post('http://localhost:8081/deletewyp/',
+                    { wypidtodelete }, //Podajemy parametr
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID wypozyczenia nie moze być puste!");
+            }
+        }
+
+        async function endWypozyczenie() {
+
+            let wypidtoend = wypIDToEnd;
+            if (wypidtoend.length > 0) {
+
+                await axios.post('http://localhost:8081/endwyp/',
+                    { wypidtoend }, //Podajemy parametry
+                )
+                    .then(response => {
+                        let text = response.data;
+                        setStatus(text);
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID zakończenia wypożyczenia nie moze być puste!");
+            }
+        }
+
+        async function findWypozyczenieByCzytelnik() {
+            setWypozyczenia([]);
+            setTextArea("");
+            let czytelnikidtofind = czytelnikIDToFind;
+            if (czytelnikidtofind.length > 0) {
+
+                await axios.post('http://localhost:8081/getczytelnikwyp/',
+                    { czytelnikidtofind }, //Podajemy parametry
+                )
+                    .then(response => {
+                    	let wypListText = ""
+                        response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.czytelnikFirstname;
+                        let llastname = e.czytelnikLastname;
+                        let ldate = e.date;
+                        let lreturndate = e.returndate;
+                        let ltitle = e.ksiazkaTitle;
+                        let lauthor = e.ksiazkaAuthor;
+
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + ", " + ltitle + ", " + lauthor + ", " + ldate + ", " + lreturndate + "\n";
+                            setTextArea(wypListText);
+                            setWypozyczenia(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+
+
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID czytelnika nie moze być puste!");
+            }
+        }
+
+                async function findWypozyczenieByKsiazka() {
+            setWypozyczenia([]);
+            setTextArea("");
+            let ksiazkaidtofind = ksiazkaIDToFind;
+            if (ksiazkaidtofind.length > 0) {
+
+                await axios.post('http://localhost:8081/getksiazkawyp/',
+                    { ksiazkaidtofind }, //Podajemy parametry
+                )
+                    .then(response => {
+                    	let wypListText = ""
+                        response.data.forEach((e) => {
+                        let lid = e.id;
+                        let lfirstname = e.czytelnikFirstname;
+                        let llastname = e.czytelnikLastname;
+                        let ldate = e.date;
+                        let lreturndate = e.returndate;
+                        let ltitle = e.ksiazkaTitle;
+                        let lauthor = e.ksiazkaAuthor;
+
+
+                        let firstPartText = lfirstname.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + lid + ", " + lfirstname + ", " + llastname + ", " + ltitle + ", " + lauthor + ", " + ldate + ", " + lreturndate + "\n";
+                            setTextArea(wypListText);
+                            setWypozyczenia(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = lfirstname.substring(("ERROR:").length, lfirstname.length);
+                            wypListText = lfirstname + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    })
+
+
+
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("ID książki nie moze być puste!");
+            }
+        }
+
+
+        function handleTabClick1(event) {
+            const tabId = event.target.getAttribute("href");
+            setTextArea("");
+            setNewFirstname("Name");
+            setNewLastname("Surname");
+            setNewDate("22-12-2023");
+            setNewTitle("Title");
+            setNewAuthor("Author");
+            setNewISBN("0-00-isbn");
+
+        }
+
+        const handleSubmitWyp = (event) => {
+            addWypozyczenie();
+            event.preventDefault();
+        }
+        const handleSubmitCzytelnik = (event) => {
+            addCzytelnik();
+            event.preventDefault();
+        }
+        const handleSubmitKsiazka = (event) => {
+            addKsiazka();
+            event.preventDefault();
+        }
+
+        return (
+
+            <div>
+                <img src="baner.png" alt="Banner" />
+                <div class="container">
+
+                    <h3>Status: {status}</h3>
+                </div>
+
+                <div class="container">
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#menu1" onClick={handleTabClick1}>Info</a></li>
+        <li><a data-toggle="tab" href="#menu2" onClick={handleTabClick1}>Wypożyczenia</a></li>
+        <li><a data-toggle="tab" href="#menu3" onClick={handleTabClick1}>Czytelnicy</a></li>
+        <li><a data-toggle="tab" href="#menu4" onClick={handleTabClick1}>Książki</a></li>
+    </ul>
+</div>
+
+                <div class="tab-content">
+                    <div id="menu1" class="tab-pane fade in active">
+                            <div class="container">
+                        <h2>Klient dostępu do obsługi wypożyczeń z użyciem REST </h2>
+                        <h3>Michał Pasieka</h3>
+                        <h3>Informatyka, 3 rok PANS w Krośnie</h3>
+                             </div>
+                    </div>
+                    <div id="menu2" class="tab-pane fade">
+                        <div class="container">
+                        <img src="lend.png" alt="lend" />
+                            <p></p>
+
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getWypozyczenia}><i class="bi bi-database-fill-down"></i>  Odczytaj listę wszystkich wypożyczeń </button>
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getUnreturnedWypozyczenia}><i class="bi bi-bookmark-x-fill"></i>  Odczytaj listę nieoddanych wypożyczeń </button>
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getReturnedWypozyczenia}><i class="bi bi-bookmark-check-fill "></i>  Odczytaj listę oddanych wypożyczeń </button>
+                            <p></p>
+
+                    <div class="container">
+
+                        <table id = 'dsTable' class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th> <th>Imię</th> <th>Nazwisko</th> <th>Tytuł</th> <th>Autor</th> <th>Data wyp.</th> <th>Data zwrotu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {wypozyczenia.map((wypozyczenie) => (
+                                    <tr key={wypozyczenie.id}>
+                                        <td>{wypozyczenie.id}</td>
+                                        <td>{wypozyczenie.czytelnikFirstname}</td>
+                                        <td>{wypozyczenie.czytelnikLastname}</td>
+                                        <td>{wypozyczenie.ksiazkaTitle}</td>
+                                        <td>{wypozyczenie.ksiazkaAuthor}</td>
+                                        <td>{wypozyczenie.date}</td>
+                                        <td>{wypozyczenie.returndate}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <br/>
+
+
+
+
+                    </div>
+                            <textarea value={textArea} rows="8" cols="75" onChange={(e) => setTextArea(e.target.value)} />
+
+                            <p></p>
+                            <h3> Szukaj wypożyczeń</h3>
+                            <p></p>
+                            <label> ID czytelnika:</label>
+                            <input type="text" name='czytelnikIDToFind' value={czytelnikIDToFind} onChange={(e) => setCzytelnikIDToFind(e.target.value)} />
+                            <button type="button" class="btn btn-primary btn-lg" onClick={findWypozyczenieByCzytelnik}><i class="bi bi-search"></i>  Szukaj  </button>
+                            <label> ID Książki:</label>
+                            <input type="text" name='ksiazkaIDToFind' value={ksiazkaIDToFind} onChange={(e) => setKsiazkaIDToFind(e.target.value)} />
+                            <button type="button" class="btn btn-primary btn-lg" onClick={findWypozyczenieByKsiazka}><i class="bi bi-search"></i>  Szukaj  </button>
+                            <p></p>
+
+
+                            <hr></hr>
+                            <h3> Dane nowego wypożyczenia: </h3>
+
+
+                            <form onSubmit={handleSubmitWyp}>
+                                <label> ID czytelnika: </label>  <input type="text" name='newFirstname' value={newCzytelnikID} onChange={(e) => setNewCzytelnikID(e.target.value)} /> <p></p>
+                                <label> ID książki: </label>  <input type="text" name='newLastname' value={newKsiazkaID} onChange={(e) => setNewKsiazkaID(e.target.value)} /> <p></p>
+                                <label> Data wypożyczenia: </label> <input type="text" name='newDate' value={newDate} onChange={(e) => setNewDate(e.target.value)} /> <p></p>
+
+                                <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-plus-lg"></i>  Dodaj  </button>
+                            </form>
+                            <hr></hr>
+                            <p></p><p></p>
+                            <h3> Zakończenie wypożyczenia: </h3>
+                            <p></p>
+                            <label>  Podaj id wypożyczenia do zakończenia: </label>
+                            <input type="text" name='wypIDToDelete' value={wypIDToEnd} onChange={(e) => setWypIDToEnd(e.target.value)} />
+                            <p></p>
+
+                            <button type="button" class="btn btn-warning btn-lg" onClick={endWypozyczenie}><i class="bi bi-calendar-check-fill"></i>  Zakończ  </button>
+                            <hr></hr>
+                            <p></p>
+                            <h3>  Usuwanie wypożyczeń </h3>
+                            <p></p>
+                            <label>  Podaj id wypozyczenia do usunięcia: </label>
+                            <input type="text" name='wypIDToDelete' value={wypIDToDelete} onChange={(e) => setWypIDToDelete(e.target.value)} />
+                            <button type="button" class="btn btn-danger btn-lg"  onClick={deleteWypozyczenie}><i class="bi bi-trash-fill"></i>  Usuń  </button>
+                        </div>
+                    </div>
+                    <div id="menu3" class="tab-pane fade">
+                        <div class="container">
+                        <img src="reader.png" alt="reader" />
+
+                            <p></p>
+
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getCzytelnicy}><i class="bi bi-person"></i>  Odczytaj listę wszystkich czytelników </button>
+
+                            <p></p>
+                    <div class="container">
+
+                        <table id = 'dsTable' class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th> <th>Imię</th> <th>Nazwisko</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {czytelnicy.map((czytelnik) => (
+                                    <tr key={czytelnik.id}>
+                                        <td>{czytelnik.id}</td>
+                                        <td>{czytelnik.firstname}</td>
+                                        <td>{czytelnik.lastname}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <br/>
+
+
+
+
+                    </div>
+
+                            <textarea value={textArea} rows="8" cols="75" onChange={(e) => setTextArea(e.target.value)} />
+
+                            <p></p><p></p>
+
+
+                            <hr></hr>
+                            <h3> Dane nowego czytelnika: </h3>
+
+
+                            <form onSubmit={handleSubmitCzytelnik}>
+                                <label> Imię: </label>  <input type="text" name='newFirstname' value={newFirstname} onChange={(e) => setNewFirstname(e.target.value)} /> <p></p>
+                                <label> Nazwisko: </label>  <input type="text" name='newLastname' value={newLastname} onChange={(e) => setNewLastname(e.target.value)} /> <p></p>
+                                <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-person-fill-add"></i>  Dodaj  </button>
+                            </form>
+                            <hr></hr>
+                            <p></p><p></p>
+
+                            <h3>  Usuwanie czytelników </h3>
+                            <p></p>
+                            <label>  Podaj id czytelnika do usunięcia: </label>
+                            <input type="text" name='czytelnikIDToDelete' value={czytelnikIDToDelete} onChange={(e) => setCzytelnikIDToDelete(e.target.value)} />
+                            <button type="button" class="btn btn-danger btn-lg" onClick={deleteCzytelnik}><i class="bi bi-trash-fill"></i>  Usuń  </button>
+                        </div>
+                    </div>
+                    <div id="menu4" class="tab-pane fade">
+                        <div class="container">
+                        <img src="librarian.png" alt="librarian" />
+                            <p></p>
+
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getKsiazki}><i class="bi bi-book"></i>  Odczytaj listę wszystkich książek </button>
+
+                            <p></p>
+
+					<div class="container">
+
+                        <table id = 'dsTable' class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th> <th>Tytuł</th> <th>Autor</th> <th>ISBN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ksiazki.map((ksiazka) => (
+                                    <tr key={ksiazka.id}>
+                                        <td>{ksiazka.id}</td>
+                                        <td>{ksiazka.title}</td>
+                                        <td>{ksiazka.author}</td>
+                                        <td>{ksiazka.isbn}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <br/>
+
+
+
+
+                    </div>
+                            <textarea value={textArea} rows="8" cols="75" onChange={(e) => setTextArea(e.target.value)} />
+
+
+                            <p></p><p></p>
+
+
+
+                            <hr></hr>
+                            <h3> Dane nowej książki: </h3>
+
+
+                            <form onSubmit={handleSubmitKsiazka}>
+                                <label> Tytuł: </label>  <input type="text" name='newTitle' value={newTitle} onChange={(e) => setNewTitle(e.target.value)} /> <p></p>
+                                <label> Autor: </label>  <input type="text" name='newAuthor' value={newAuthor} onChange={(e) => setNewAuthor(e.target.value)} /> <p></p>
+                                <label> ISBN: </label>  <input type="text" name='newISBN' value={newISBN} onChange={(e) => setNewISBN(e.target.value)} /> <p></p>
+
+                                <button type="submit" class="btn btn-success btn-lg"> <i class="bi bi-plus-lg"></i>  Dodaj  </button>
+                            </form>
+                            <hr></hr>
+                            <p></p><p></p>
+                            <h3>  Usuwanie książek </h3>
+                            <p></p>
+                            <label>  Podaj id książki do usunięcia: </label>
+                            <input type="text" name='ksiazkaIDToDelete' value={ksiazkaIDToDelete} onChange={(e) => setKsiazkaIDToDelete(e.target.value)} />
+                            <button type="button" class="btn btn-danger btn-lg" onClick={deleteKsiazka}><i class="bi bi-trash-fill"></i>  Usuń  </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        );
+    }
+
+    const container = document.getElementById('Biblioteka');
+    const root = ReactDOM.createRoot(container);
+    root.render(<BibliotekaHook />);
+</script>
+
+</body>
+
+</html>
+
