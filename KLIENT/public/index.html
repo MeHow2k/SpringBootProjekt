@@ -49,7 +49,7 @@
             let date = newDate;
 //dodanie wypozyczenia
             if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
-                await axios.post('http://localhost:8081/addwyp/',
+                await axios.post('http://localhost:8081/addwyp',
                     { czytelnikId, ksiazkaId, date }, //Podajemy parametry
                 )
                     .then(response => {
@@ -71,7 +71,7 @@ async function addCzytelnik() {
 
 //dodanie czytelnika
             if ((firstname.length > 0) && (lastname.length > 0) ) {
-                await axios.post('http://localhost:8081/addczytelnik/',
+                await axios.post('http://localhost:8081/addczytelnik',
                     { firstname, lastname}, //Podajemy parametry
                 )
                     .then(response => {
@@ -94,7 +94,7 @@ async function addCzytelnik() {
             let isbn = newISBN;
 
             if ((title.length > 0) && (author.length > 0) && (isbn.length > 0) ) {
-                await axios.post('http://localhost:8081/addksiazka/',
+                await axios.post('http://localhost:8081/addksiazka',
                     { title, author,isbn}, //Podajemy parametry
                 )
                     .then(response => {
@@ -112,7 +112,7 @@ async function addCzytelnik() {
  //Pobranie listy czytelnikow z serwera
         async function getCzytelnicy() {
 
-            await axios.post('http://localhost:8081/getczytelnicy/')
+            await axios.post('http://localhost:8081/getczytelnicy')
                 .then(response => {
 
                     let wypListText = ""
@@ -148,7 +148,7 @@ async function addCzytelnik() {
          //Pobranie listy ksiazek z serwera
         async function getKsiazki() {
 
-            await axios.post('http://localhost:8081/getksiazki/')
+            await axios.post('http://localhost:8081/getksiazki')
                 .then(response => {
 
                     let wypListText = ""
@@ -184,7 +184,7 @@ async function addCzytelnik() {
         //Pobranie listy wypozyczen z serwera
         async function getWypozyczenia() {
 
-            await axios.post('http://localhost:8081/getwyp/')
+            await axios.post('http://localhost:8081/getwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -225,7 +225,7 @@ async function addCzytelnik() {
         //Pobranie listy wypozyczen z serwera
         async function getReturnedWypozyczenia() {
 
-            await axios.post('http://localhost:8081/getreturnedwyp/')
+            await axios.post('http://localhost:8081/getreturnedwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -266,7 +266,7 @@ async function addCzytelnik() {
         //Pobranie listy wypozyczen z serwera
         async function getUnreturnedWypozyczenia() {
 
-            await axios.post('http://localhost:8081/getunreturnedwyp/')
+            await axios.post('http://localhost:8081/getunreturnedwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -310,7 +310,7 @@ async function addCzytelnik() {
 
             if (czytidtodelete.length > 0) {
 
-                await axios.post('http://localhost:8081/deleteczytelnik/',
+                await axios.post('http://localhost:8081/deleteczytelnik',
                     { czytidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
@@ -331,7 +331,7 @@ async function addCzytelnik() {
 
             if (ksidtodelete.length > 0) {
 
-                await axios.post('http://localhost:8081/deleteksiazka/',
+                await axios.post('http://localhost:8081/deleteksiazka',
                     { ksidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
@@ -352,7 +352,7 @@ async function addCzytelnik() {
 
             if (wypidtodelete.length > 0) {
 
-                await axios.post('http://localhost:8081/deletewyp/',
+                await axios.post('http://localhost:8081/deletewyp',
                     { wypidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
@@ -373,7 +373,7 @@ async function addCzytelnik() {
             let wypidtoend = wypIDToEnd;
             if (wypidtoend.length > 0) {
 
-                await axios.post('http://localhost:8081/endwyp/',
+                await axios.post('http://localhost:8081/endwyp',
                     { wypidtoend }, //Podajemy parametry
                 )
                     .then(response => {
@@ -395,7 +395,7 @@ async function addCzytelnik() {
             let czytelnikidtofind = czytelnikIDToFind;
             if (czytelnikidtofind.length > 0) {
 
-                await axios.post('http://localhost:8081/getczytelnikwyp/',
+                await axios.post('http://localhost:8081/getczytelnikwyp',
                     { czytelnikidtofind }, //Podajemy parametry
                 )
                     .then(response => {
@@ -444,7 +444,7 @@ async function addCzytelnik() {
             let ksiazkaidtofind = ksiazkaIDToFind;
             if (ksiazkaidtofind.length > 0) {
 
-                await axios.post('http://localhost:8081/getksiazkawyp/',
+                await axios.post('http://localhost:8081/getksiazkawyp',
                     { ksiazkaidtofind }, //Podajemy parametry
                 )
                     .then(response => {
@@ -528,6 +528,7 @@ async function addCzytelnik() {
         <li><a data-toggle="tab" href="#menu2" onClick={handleTabClick1}>Wypożyczenia</a></li>
         <li><a data-toggle="tab" href="#menu3" onClick={handleTabClick1}>Czytelnicy</a></li>
         <li><a data-toggle="tab" href="#menu4" onClick={handleTabClick1}>Książki</a></li>
+        <li><a data-toggle="tab" href="#menu5" onClick={handleTabClick1}>Logi</a></li>
     </ul>
 </div>
 
@@ -740,6 +741,62 @@ async function addCzytelnik() {
                             <label>  Podaj id książki do usunięcia: </label>
                             <input type="text" name='ksiazkaIDToDelete' value={ksiazkaIDToDelete} onChange={(e) => setKsiazkaIDToDelete(e.target.value)} />
                             <button type="button" class="btn btn-danger btn-lg" onClick={deleteKsiazka}><i class="bi bi-trash-fill"></i>  Usuń  </button>
+                        </div>
+                    </div>
+                    <div id="menu5" class="tab-pane fade">
+                        <div class="container">               
+                            <p></p>
+
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getKsiazki}><i class="bi bi-book"></i>  Pobierz logi </button>
+
+                            <p></p>
+
+					<div class="container">
+
+                        <table id = 'dsTable' class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Data</th> <th>Tresc</th> <th>Grupa</th> <th>????</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ksiazki.map((ksiazka) => (
+                                    <tr key={ksiazka.id}>
+                                        <td>{ksiazka.id}</td>
+                                        <td>{ksiazka.title}</td>
+                                        <td>{ksiazka.author}</td>
+                                        <td>{ksiazka.isbn}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <br/>
+
+
+
+
+                    </div>
+                            <textarea value={textArea} rows="8" cols="75" onChange={(e) => setTextArea(e.target.value)} />
+
+
+                            <p></p><p></p>
+
+
+
+                            <hr></hr>
+                            <h3> Szukaj w logach: </h3>
+
+
+                            <form onSubmit={handleSubmitKsiazka}>
+                                <label> Tytuł: </label>  <input type="text" name='newTitle' value={newTitle} onChange={(e) => setNewTitle(e.target.value)} /> <p></p>
+                                <label> Autor: </label>  <input type="text" name='newAuthor' value={newAuthor} onChange={(e) => setNewAuthor(e.target.value)} /> <p></p>
+                                <label> ISBN: </label>  <input type="text" name='newISBN' value={newISBN} onChange={(e) => setNewISBN(e.target.value)} /> <p></p>
+
+                                <button type="submit" class="btn btn-success btn-lg"> <i class="bi bi-plus-lg"></i>  Dodaj  </button>
+                            </form>
+                            <hr></hr>
+                            <p></p><p></p>                                    
                         </div>
                     </div>
                 </div>

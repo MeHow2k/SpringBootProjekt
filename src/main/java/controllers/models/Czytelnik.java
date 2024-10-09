@@ -2,7 +2,7 @@ package controllers.models;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data //Adnotacja @Data wystarczy aby Lombok wygenerował getery, setery, toString, equals i inne
 @Entity
