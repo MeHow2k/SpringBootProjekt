@@ -19,7 +19,11 @@ public class Czytelnik {
 
     @Column(name = "lastname")
     private String lastname;
-
+    @Override
+    public String toString() {
+        return String.format(
+                "(id=%d, firstname='%s' surname='%s')",id, firstname,lastname);
+    }
 
     public Czytelnik(String firstname, String lastname) {
         //this.id = id;

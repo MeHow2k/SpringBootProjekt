@@ -26,6 +26,12 @@ public class Wypozyczenie {
     @ManyToOne
     private Czytelnik czytelnik;
 
+    @Override
+    public String toString() {
+        return String.format(
+                "(id=%d, date='%s' returndate='%s')"+ " Czytelnik:"+ czytelnik.toString() +" Książka:" +ksiazka.toString()  ,id, date,returndate);
+    }
+
     public Wypozyczenie(String date, String returndate) {
         //this.id = id;
         this.date = date;

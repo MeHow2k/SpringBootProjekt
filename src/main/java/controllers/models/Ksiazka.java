@@ -34,7 +34,7 @@ import java.util.Set;
         @Override
         public String toString() {
             return String.format(
-                    "Ksiazka[id=%d, title='%s' author='%s' ISBN='%s']",id, title,author,ISBN);
+                    "(id=%d, title='%s' author='%s' ISBN='%s')",id, title,author,ISBN);
         }
 
         public int getId() {
