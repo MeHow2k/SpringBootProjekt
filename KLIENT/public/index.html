@@ -24,6 +24,7 @@
         const [wypozyczenia, setWypozyczenia] = React.useState([]);
         const [ksiazki, setKsiazki] = React.useState([]);
         const [czytelnicy, setCzytelnicy] = React.useState([]);
+        const [logi, setLogi] = React.useState([]);
         const [textArea, setTextArea] = React.useState("Brak danych");
         const [newFirstname, setNewFirstname] = React.useState("adam");
         const [newLastname, setNewLastname] = React.useState("nowak");
@@ -221,6 +222,43 @@ async function addCzytelnik() {
                 });
 
         }
+
+        //Pobranie listy logów z serwera
+        async function getLogi() {
+
+await axios.post('http://localhost:8081/getlogs')
+    .then(response => {
+
+        let wypListText = ""
+
+        response.data.forEach((e) => {
+            let lid = e.id;
+            let ltimestamp = e.timestamp;
+            let llevel = e.level;
+            let lmessage = e.message;
+
+            let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
+
+            if (firstPartText !== "ERROR:") {
+                wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
+                setTextArea(wypListText);
+                setLogi(response.data);
+                setStatus("OK");
+            }
+            else {
+                let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
+                wypListText = ltimestamp + "\n";
+                setTextArea(wypListText);
+                setStatus(secondPartText);
+            }
+        })
+
+    }).catch(err => {
+        let myerror = "Blad polaczenia sieciowego." + err;
+        setStatus(myerror);
+    });
+
+}
 
         //Pobranie listy wypozyczen z serwera
         async function getReturnedWypozyczenia() {
@@ -743,11 +781,12 @@ async function addCzytelnik() {
                             <button type="button" class="btn btn-danger btn-lg" onClick={deleteKsiazka}><i class="bi bi-trash-fill"></i>  Usuń  </button>
                         </div>
                     </div>
+
                     <div id="menu5" class="tab-pane fade">
                         <div class="container">               
                             <p></p>
 
-                            <button type="button" class="btn btn-primary btn-lg" onClick={getKsiazki}><i class="bi bi-book"></i>  Pobierz logi </button>
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getLogi}><i class="bi bi-book"></i>  Wyświetl logi </button>
 
                             <p></p>
 
@@ -756,16 +795,15 @@ async function addCzytelnik() {
                         <table id = 'dsTable' class="table table-striped table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Data</th> <th>Tresc</th> <th>Grupa</th> <th>????</th>
+                                    <th>Data</th> <th>Poziom</th> <th>Opis</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {ksiazki.map((ksiazka) => (
-                                    <tr key={ksiazka.id}>
-                                        <td>{ksiazka.id}</td>
-                                        <td>{ksiazka.title}</td>
-                                        <td>{ksiazka.author}</td>
-                                        <td>{ksiazka.isbn}</td>
+                                {logi.map((log) => (
+                                    <tr key={log.id}>
+                                        <td>{log.timestamp}</td>
+                                        <td>{log.level}</td>
+                                        <td>{log.message}</td>                                   
                                     </tr>
                                 ))}
                             </tbody>

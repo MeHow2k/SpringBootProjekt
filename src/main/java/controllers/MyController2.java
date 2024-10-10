@@ -8,12 +8,16 @@ import common.KKsiazka;
 import common.WWypozyczenie;
 import controllers.models.Czytelnik;
 import controllers.models.Ksiazka;
+import controllers.models.MyLogRecord;
 import controllers.models.Wypozyczenie;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
+
+import controllers.repositories.MyLogRecordRepository;
 import jakarta.servlet.ServletRequest;
 
 import controllers.repositories.CzytelnikRepository;
@@ -54,6 +58,11 @@ public class MyController2 {
     KsiazkaRepository ksiazkiRepository;
     @Autowired
     CzytelnikRepository czytelnikRepository;
+    @Autowired
+    MyLogRecordRepository myLogRecordRepository;
+
+    @Autowired
+    private Logger logger;
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public String systemInfo() {
@@ -73,7 +82,7 @@ public class MyController2 {
             String czytelnikId = obj.getString("czytelnikId");
             String ksiazkaID = obj.getString("ksiazkaId");
             String date = obj.getString("date");
-            // String returndate = obj.getString("date");
+
 
             Czytelnik czytelnik = czytelnikRepository.findById(Integer.parseInt(czytelnikId));
             Ksiazka ksiazka = ksiazkiRepository.findById(Integer.parseInt(ksiazkaID));
@@ -83,6 +92,10 @@ public class MyController2 {
             wypozyczenie.setKsiazka(ksiazka);
 
             wypRepository.save(wypozyczenie);
+
+            //log
+            String logString = "Dodano wypożyczenie: "+wypozyczenie.toString();
+            logger.info(logString);
 
             ResponseEntity<String> res = new ResponseEntity("Dodano wypożyczenie", HttpStatus.OK);
             return res;
@@ -311,6 +324,10 @@ public class MyController2 {
 
             wypRepository.delete(locTransfer);
 
+            //log
+            String logString = "Usunięto wypożyczenie: "+ locTransfer.toString();
+            logger.severe(logString);
+
             ResponseEntity<String> res = new ResponseEntity("Usunięto wypozyczenie o id: "+wypidtodelete, HttpStatus.OK);
             return res;
         }
@@ -337,6 +354,10 @@ public class MyController2 {
             }
 
             czytelnikRepository.delete(locTransfer);
+
+            //log
+            String logString = "Usunięto czytelnika: "+ locTransfer.toString();
+            logger.severe(logString);
 
             ResponseEntity<String> res = new ResponseEntity("Usunięto czytelnika o id: "+wypidtodelete, HttpStatus.OK);
             return res;
@@ -368,6 +389,10 @@ public class MyController2 {
             }
 
             ksiazkiRepository.delete(locTransfer);
+
+            //log
+            String logString = "Usunięto książkę: "+ locTransfer.toString();
+            logger.severe(logString);
 
             ResponseEntity<String> res = new ResponseEntity("Usunięto książkę o id: "+wypidtodelete, HttpStatus.OK);
             return res;
@@ -404,6 +429,10 @@ public class MyController2 {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             locTransfer.setReturndate(dateFormat.format(date));
             wypRepository.save(locTransfer);
+
+            //log
+            String logString = "Zakończono wypożyczenie: "+ locTransfer.toString();
+            logger.info(logString);
 
             ResponseEntity<String> res = new ResponseEntity("Zakończono wypozyczenie o id: "+wypidtoend, HttpStatus.OK);
             return res;
@@ -469,6 +498,10 @@ public class MyController2 {
 
             ksiazkiRepository.save(ksiazka);
 
+            //log
+            String logString = "Dodano książkę: "+ ksiazka.toString();
+            logger.info(logString);
+
             ResponseEntity<String> res = new ResponseEntity("Dodano książkę", HttpStatus.OK);
             return res;
 
@@ -495,6 +528,10 @@ public class MyController2 {
             Czytelnik czytelnik = new Czytelnik(firstname,  lastname);
 
             czytelnikRepository.save(czytelnik);
+
+            //log
+            String logString = "Dodano czytelnika: "+ czytelnik.toString();
+            logger.info(logString);
 
             ResponseEntity<String> res = new ResponseEntity("Dodano czytelnika", HttpStatus.OK);
             return res;
@@ -540,6 +577,33 @@ public class MyController2 {
             locTransfer.setFirstname("ERROR:"+e.getMessage());
             locTransferList.add(locTransfer);
             ResponseEntity<ArrayList<CCzytelnik>> res = new ResponseEntity(locTransferList, HttpStatus.OK);
+            return res;
+        }
+    }
+
+    @RequestMapping(value = "/getlogs", method = RequestMethod.POST)
+    public ResponseEntity<ArrayList<MyLogRecord>> getLogs(ServletRequest request) {
+
+        try
+        {
+            ArrayList<MyLogRecord> logList = (ArrayList<MyLogRecord>) myLogRecordRepository.findAll();
+
+            if (myLogRecordRepository==null)
+            {
+                throw new IllegalArgumentException("Nie ma danych");
+            }
+
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(logList, HttpStatus.OK);
+            return res;
+
+        }
+        catch (Exception e)
+        {
+            ArrayList<MyLogRecord> locTransferList = new ArrayList<MyLogRecord>();
+            MyLogRecord locTransfer = new MyLogRecord();
+            locTransfer.setMessage("ERROR:"+e.getMessage());
+            locTransferList.add(locTransfer);
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(locTransferList, HttpStatus.OK);
             return res;
         }
     }

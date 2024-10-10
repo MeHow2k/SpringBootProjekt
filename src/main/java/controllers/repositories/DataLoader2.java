@@ -3,6 +3,7 @@ package controllers.repositories;
 
 import controllers.models.Czytelnik;
 import controllers.models.Ksiazka;
+import controllers.models.MyLogRecord;
 import controllers.models.Wypozyczenie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -21,13 +22,15 @@ public class DataLoader2 implements ApplicationRunner {
     private WypozyczenieRepository wypRepository;
     private KsiazkaRepository ksiazkaRepository;
     private CzytelnikRepository czytelnikRepository;
+    private  MyLogRecordRepository myLogRecordRepository;
 
     @Autowired
-    public DataLoader2(WypozyczenieRepository wypRepository, KsiazkaRepository ksiazkaRepository,CzytelnikRepository czytelnikRepository)
+    public DataLoader2(WypozyczenieRepository wypRepository, KsiazkaRepository ksiazkaRepository,CzytelnikRepository czytelnikRepository,MyLogRecordRepository myLogRecordRepository)
     {
         this.wypRepository = wypRepository;
         this.ksiazkaRepository = ksiazkaRepository;
         this.czytelnikRepository = czytelnikRepository;
+        this.myLogRecordRepository=myLogRecordRepository;
     }
 
 
@@ -37,62 +40,12 @@ public class DataLoader2 implements ApplicationRunner {
         try
         {
 
-//            Wypozyczenie wyp1 = new Wypozyczenie("01-01-2024");
-//            wypRepository.saveAndFlush(wyp1);
+//            MyLogRecord myLogRecord = new MyLogRecord();
+//            myLogRecord.setMessage("Testowy log");
+//            myLogRecord.setTimestamp("1970-01-01 00:00:00");
+//            myLogRecord.setLevel("WARNING");
 //
-//            Wypozyczenie wyp2 = new Wypozyczenie("02-02-2024");
-//            wypRepository.saveAndFlush(wyp2);
-//
-//            Wypozyczenie wyp3 = new Wypozyczenie("03-03-2024");
-//            wypRepository.saveAndFlush(wyp3);
-//
-//            Wypozyczenie wyp4 = new Wypozyczenie("03-03-2023","22-02-2024");
-//            wypRepository.saveAndFlush(wyp4);
-//
-//            Ksiazka k1 = new Ksiazka("Tytul1","Autor1","1111111");
-//            ksiazkaRepository.saveAndFlush(k1);
-//
-//            Ksiazka k2 = new Ksiazka("Tytul2","Autor2","22222222");
-//            ksiazkaRepository.saveAndFlush(k2);
-//
-//            Ksiazka k3 = new Ksiazka("Tytul2","Autor2","33333333");
-//            ksiazkaRepository.saveAndFlush(k3);
-//
-//            Czytelnik c1 = new Czytelnik("Adam","Nowak");
-//            czytelnikRepository.saveAndFlush(c1);
-//            Czytelnik c2 = new Czytelnik("Anna","Kowal");
-//            czytelnikRepository.saveAndFlush(c2);
-//            Czytelnik c3 = new Czytelnik("Ewa","Wójcik");
-//            czytelnikRepository.saveAndFlush(c3);
-//
-//            wyp1.setKsiazka(k3);
-//            wyp2.setKsiazka(k2);
-//            wyp3.setKsiazka(k1);
-//            wyp4.setKsiazka(k2);
-//
-//            wyp1.setCzytelnik(c1);
-//            wyp2.setCzytelnik(c2);
-//            wyp3.setCzytelnik(c3);
-//            wyp4.setCzytelnik(c1);
-//
-//            wypRepository.saveAndFlush(wyp1);
-//            wypRepository.saveAndFlush(wyp2);
-//            wypRepository.saveAndFlush(wyp3);
-//            wypRepository.saveAndFlush(wyp4);
-//
-////            System.out.println(wyp1);
-////            System.out.println(wyp2);
-////            System.out.println(wyp3);
-////            System.out.println(wyp4);
-////
-////            System.out.println(k1);
-////            System.out.println(k2);
-////
-////            System.out.println(c1);
-////            System.out.println(c2);
-////            System.out.println(c3);
-
-
+//            myLogRecordRepository.saveAndFlush(myLogRecord);
 
 // Książki
             List<Ksiazka> ksiazki = Arrays.asList(
