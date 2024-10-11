@@ -608,4 +608,45 @@ public class MyController2 {
         }
     }
 
+    @RequestMapping(value = "/getlogsbystring", method = RequestMethod.POST)
+    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByString(@RequestBody String jsonString) {
+
+        try
+        {
+            JSONObject obj = new JSONObject(jsonString);
+            String stringToFind = obj.getString("logstringtofind").toLowerCase();
+
+
+            ArrayList<MyLogRecord> logList = (ArrayList<MyLogRecord>) myLogRecordRepository.findAll();
+
+            if (myLogRecordRepository==null)
+            {
+                throw new IllegalArgumentException("Nie ma danych");
+            }
+
+            ArrayList<MyLogRecord> foundLogList = new ArrayList<MyLogRecord>();
+
+            for (int i=0; i < logList.size(); i++){
+                MyLogRecord log = logList.get(i);
+                if(log.getMessage().toLowerCase().contains(stringToFind)){
+                    foundLogList.add(log);
+                }
+            }
+
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(foundLogList, HttpStatus.OK);
+            return res;
+
+        }
+        catch (Exception e)
+        {
+            ArrayList<MyLogRecord> locTransferList = new ArrayList<MyLogRecord>();
+            MyLogRecord locTransfer = new MyLogRecord();
+            locTransfer.setMessage("ERROR:"+e.getMessage());
+            locTransferList.add(locTransfer);
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(locTransferList, HttpStatus.OK);
+            return res;
+        }
+    }
+
+
 }

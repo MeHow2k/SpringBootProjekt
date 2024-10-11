@@ -29,6 +29,9 @@
         const [newFirstname, setNewFirstname] = React.useState("adam");
         const [newLastname, setNewLastname] = React.useState("nowak");
         const [newTitle, setNewTitle] = React.useState("title");
+        const [newFindLogText, setFindLogText] = React.useState("");
+        const [newFindLogBeginDate, setFindLogBeginDate] = React.useState("");
+        const [newFindLogEndDate, setFindLogEndDate] = React.useState("");
         const [newAuthor, setNewAuthor] = React.useState("author");
         const [newISBN, setNewISBN] = React.useState("00-0-isbn");
         const [newDate, setNewDate] = React.useState("22-12-2023");
@@ -525,6 +528,50 @@ await axios.post('http://localhost:8081/getlogs')
             }
         }
 
+        async function findLog() {
+            setLogi([]);
+            setTextArea("");
+            let logstringtofind = newFindLogText;
+            if (logstringtofind.length > 0) {
+
+                await axios.post('http://localhost:8081/getlogsbystring',
+                    { logstringtofind }, //Podajemy parametry
+                )
+                    .then(response => {
+                    	let wypListText = ""
+                        response.data.forEach((e) => {
+                        let lid = e.id;
+                        let ltimestamp = e.timestamp;
+                        let llevel = e.level;
+                        let lmessage = e.message;                   
+                    
+                        let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
+                            setTextArea(wypListText);
+                            setLogi(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
+                            wypListText = ltimestamp + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    
+                    })
+
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }
+            else {
+                setStatus("Pole tekstu nie moze być puste!");
+            }
+        }
+
 
         function handleTabClick1(event) {
             const tabId = event.target.getAttribute("href");
@@ -550,6 +597,11 @@ await axios.post('http://localhost:8081/getlogs')
             addKsiazka();
             event.preventDefault();
         }
+        const handleSubmitLog = (event) => {
+            findLog();
+            event.preventDefault();
+        }
+
 
         return (
 
@@ -826,12 +878,11 @@ await axios.post('http://localhost:8081/getlogs')
                             <h3> Szukaj w logach: </h3>
 
 
-                            <form onSubmit={handleSubmitKsiazka}>
-                                <label> Tytuł: </label>  <input type="text" name='newTitle' value={newTitle} onChange={(e) => setNewTitle(e.target.value)} /> <p></p>
-                                <label> Autor: </label>  <input type="text" name='newAuthor' value={newAuthor} onChange={(e) => setNewAuthor(e.target.value)} /> <p></p>
-                                <label> ISBN: </label>  <input type="text" name='newISBN' value={newISBN} onChange={(e) => setNewISBN(e.target.value)} /> <p></p>
-
-                                <button type="submit" class="btn btn-success btn-lg"> <i class="bi bi-plus-lg"></i>  Dodaj  </button>
+                            <form onSubmit={handleSubmitLog}>
+                                <label> Tekst: </label>  <input type="text" name='newFindLogText' value={newFindLogText} onChange={(e) => setFindLogText(e.target.value)} /> <p></p>                           
+                                <label> Data od: </label>  <input type="text" name='newFindLogBeginDate' value={newFindLogBeginDate} onChange={(e) => setFindLogBeginDate(e.target.value)} /> 
+                                <label> do: </label>  <input type="text" name='newFindLogEndDate' value={newFindLogEndDate} onChange={(e) => setFindLogEndDate(e.target.value)} /> <p></p>
+                                <button type="submit" class="btn btn-success btn-lg" > <i class="bi bi-plus-lg"></i>  Szukaj  </button>
                             </form>
                             <hr></hr>
                             <p></p><p></p>                                    
