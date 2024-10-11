@@ -11,7 +11,9 @@ import controllers.models.Ksiazka;
 import controllers.models.MyLogRecord;
 import controllers.models.Wypozyczenie;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -641,7 +643,77 @@ public class MyController2 {
         {
             ArrayList<MyLogRecord> locTransferList = new ArrayList<MyLogRecord>();
             MyLogRecord locTransfer = new MyLogRecord();
-            locTransfer.setMessage("ERROR:"+e.getMessage());
+            locTransfer.setTimestamp("ERROR:"+e.getMessage());
+            locTransferList.add(locTransfer);
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(locTransferList, HttpStatus.OK);
+            return res;
+        }
+    }
+    @RequestMapping(value = "/getlogbydate", method = RequestMethod.POST)
+    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByDate(@RequestBody String jsonString) {
+
+        try
+        {
+            JSONObject obj = new JSONObject(jsonString);
+            String stringToFind = obj.getString("logstringtofind").toLowerCase();
+            String beginDateToFind = obj.getString("logbegindate");
+            String endDateToFind = obj.getString("logenddate");
+            if (beginDateToFind.isBlank()) beginDateToFind="1970-01-01 00:00:00";
+            if (endDateToFind.isBlank()) endDateToFind="2200-12-31 23:59:59";
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date begindate,enddate;
+
+            begindate = dateFormat.parse(beginDateToFind);
+            enddate = dateFormat.parse(endDateToFind);
+
+            ArrayList<MyLogRecord> logList = (ArrayList<MyLogRecord>) myLogRecordRepository.findAll();
+
+            if (myLogRecordRepository==null)
+            {
+                throw new IllegalArgumentException("Nie ma danych");
+            }
+
+            ArrayList<MyLogRecord> foundLogList = new ArrayList<MyLogRecord>();
+
+            if(stringToFind.isBlank() || stringToFind==null) {
+                foundLogList=logList;
+            }else {
+                for (int i = 0; i < logList.size(); i++) {
+                    MyLogRecord log = logList.get(i);
+                    if (log.getMessage().toLowerCase().contains(stringToFind)) {
+                        foundLogList.add(log);
+                    }
+                }
+            }
+//            for (int i=0; i < foundLogList.size(); i++){
+//                MyLogRecord log = foundLogList.get(i);
+//                if(dateFormat.parse(log.getTimestamp()).before(begindate) || dateFormat.parse(log.getTimestamp()).after(enddate)){
+//                    foundLogList.remove(log);
+//                    System.out.println(dateFormat.parse(log.getTimestamp()).before(begindate));
+//                    System.out.println(dateFormat.parse(log.getTimestamp()).before(enddate));
+//                }
+//            }
+
+            foundLogList.removeIf(log -> {
+                try {
+                    Date logDate = dateFormat.parse(log.getTimestamp());
+                    return logDate.before(begindate) || logDate.after(enddate);
+                } catch (Exception e) {
+                    System.out.println("Date parsing error: " + e.getMessage());
+                    return true; // W razie błędu parsowania usuń ten element
+                }
+            });
+
+            ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(foundLogList, HttpStatus.OK);
+            return res;
+
+        }
+        catch (Exception e)
+        {
+            ArrayList<MyLogRecord> locTransferList = new ArrayList<MyLogRecord>();
+            MyLogRecord locTransfer = new MyLogRecord();
+            locTransfer.setTimestamp("ERROR:"+e.getMessage());
             locTransferList.add(locTransfer);
             ResponseEntity<ArrayList<MyLogRecord>> res = new ResponseEntity(locTransferList, HttpStatus.OK);
             return res;

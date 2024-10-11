@@ -532,7 +532,7 @@ await axios.post('http://localhost:8081/getlogs')
             setLogi([]);
             setTextArea("");
             let logstringtofind = newFindLogText;
-            if (logstringtofind.length > 0) {
+            
 
                 await axios.post('http://localhost:8081/getlogsbystring',
                     { logstringtofind }, //Podajemy parametry
@@ -565,11 +565,50 @@ await axios.post('http://localhost:8081/getlogs')
                     }).catch(err => {
                         let myerror = "Blad polaczenia sieciowego." + err;
                         setStatus(myerror);
+                    });                                
+        }
+
+        async function findLogByDate() {
+            setLogi([]);
+            setTextArea("");
+            let logstringtofind = newFindLogText;
+            let logbegindate = newFindLogBeginDate;
+            let logenddate = newFindLogEndDate;
+            
+
+                await axios.post('http://localhost:8081/getlogbydate',
+                    { logstringtofind, logbegindate, logenddate}, //Podajemy parametry
+                )
+                    .then(response => {
+                    	let wypListText = ""
+                        response.data.forEach((e) => {
+                        let lid = e.id;
+                        let ltimestamp = e.timestamp;
+                        let llevel = e.level;
+                        let lmessage = e.message;                   
+                    
+                        let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
+                            setTextArea(wypListText);
+                            setLogi(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
+                            wypListText = ltimestamp + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+                    
+                    })
+
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
                     });
-            }
-            else {
-                setStatus("Pole tekstu nie moze być puste!");
-            }
+                  
         }
 
 
@@ -598,7 +637,12 @@ await axios.post('http://localhost:8081/getlogs')
             event.preventDefault();
         }
         const handleSubmitLog = (event) => {
-            findLog();
+            if(newFindLogBeginDate.length==0 && newFindLogEndDate.length==0){
+                findLog();
+            }else{
+                console.log("Finding by date");
+                findLogByDate();
+            }
             event.preventDefault();
         }
 
@@ -838,7 +882,7 @@ await axios.post('http://localhost:8081/getlogs')
                         <div class="container">               
                             <p></p>
 
-                            <button type="button" class="btn btn-primary btn-lg" onClick={getLogi}><i class="bi bi-book"></i>  Wyświetl logi </button>
+                            <button type="button" class="btn btn-primary btn-lg" onClick={getLogi}><i class="bi bi-book"></i>  Wyświetl wszystkie logi </button>
 
                             <p></p>
 
@@ -881,8 +925,10 @@ await axios.post('http://localhost:8081/getlogs')
                             <form onSubmit={handleSubmitLog}>
                                 <label> Tekst: </label>  <input type="text" name='newFindLogText' value={newFindLogText} onChange={(e) => setFindLogText(e.target.value)} /> <p></p>                           
                                 <label> Data od: </label>  <input type="text" name='newFindLogBeginDate' value={newFindLogBeginDate} onChange={(e) => setFindLogBeginDate(e.target.value)} /> 
-                                <label> do: </label>  <input type="text" name='newFindLogEndDate' value={newFindLogEndDate} onChange={(e) => setFindLogEndDate(e.target.value)} /> <p></p>
-                                <button type="submit" class="btn btn-success btn-lg" > <i class="bi bi-plus-lg"></i>  Szukaj  </button>
+                                <label> do: </label>  <input type="text" name='newFindLogEndDate' value={newFindLogEndDate} onChange={(e) => setFindLogEndDate(e.target.value)} /> 
+                                <button type="submit" class="btn btn-primary btn-lg" > <i class="bi bi-search"></i>  Szukaj  </button><p></p>
+                                <label> Format daty: "YYYY-MM-DD HH:MM:SS" </label><p></p>       
+                                <label> np.: "2024-11-11 11:11:11" </label>                     
                             </form>
                             <hr></hr>
                             <p></p><p></p>                                    
