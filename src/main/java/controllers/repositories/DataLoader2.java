@@ -1,16 +1,12 @@
 package controllers.repositories;
 //Dodanie danych na samym poczatku
 
-import controllers.models.Czytelnik;
-import controllers.models.Ksiazka;
-import controllers.models.MyLogRecord;
-import controllers.models.Wypozyczenie;
+import controllers.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,14 +19,21 @@ public class DataLoader2 implements ApplicationRunner {
     private KsiazkaRepository ksiazkaRepository;
     private CzytelnikRepository czytelnikRepository;
     private  MyLogRecordRepository myLogRecordRepository;
+    private  UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public DataLoader2(WypozyczenieRepository wypRepository, KsiazkaRepository ksiazkaRepository,CzytelnikRepository czytelnikRepository,MyLogRecordRepository myLogRecordRepository)
+    public DataLoader2(WypozyczenieRepository wypRepository, KsiazkaRepository ksiazkaRepository,CzytelnikRepository czytelnikRepository
+            ,MyLogRecordRepository myLogRecordRepository,UserRepository userRepository,RoleRepository roleRepository,PasswordEncoder passwordEncoder)
     {
         this.wypRepository = wypRepository;
         this.ksiazkaRepository = ksiazkaRepository;
         this.czytelnikRepository = czytelnikRepository;
         this.myLogRecordRepository=myLogRecordRepository;
+        this.userRepository=userRepository;
+        this.roleRepository=roleRepository;
+        this.passwordEncoder=passwordEncoder;
     }
 
 
@@ -146,6 +149,48 @@ public class DataLoader2 implements ApplicationRunner {
 
 
             wypozyczenia.forEach(wypozyczenie -> wypRepository.saveAndFlush(wypozyczenie));
+
+            ///USERS' initialize
+            DBRole adminRole = new DBRole();
+            adminRole.setName("ADMIN");
+            roleRepository.save(adminRole);
+
+            DBRole staffRole = new DBRole();
+            staffRole.setName("STAFF");
+            roleRepository.save(staffRole);
+
+            DBRole clientRole = new DBRole();
+            clientRole.setName("CLIENT");
+            roleRepository.save(clientRole);
+
+            //----------------
+
+            DBUser admin = new DBUser();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.getRoles().add(adminRole);
+            admin.getRoles().add(clientRole);
+            userRepository.save(admin);
+
+            DBUser staff = new DBUser();
+            staff.setUsername("staff");
+            staff.setPassword(passwordEncoder.encode("staff123"));
+            staff.getRoles().add(staffRole);
+            userRepository.save(staff);
+
+            DBUser client = new DBUser();
+            client.setUsername("client");
+            client.setPassword(passwordEncoder.encode("client123"));
+            client.getRoles().add(clientRole);
+            userRepository.save(client);
+
+            DBUser pasieka = new DBUser();
+            pasieka.setUsername("pasieka");
+            pasieka.setPassword(passwordEncoder.encode("pasieka123"));
+            pasieka.getRoles().add(adminRole);
+            pasieka.getRoles().add(clientRole);
+            pasieka.getRoles().add(staffRole);
+            userRepository.save(pasieka);
 
 
         }

@@ -31,11 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 
 //To jest kontroler do częsci aplikacji bez JWT (baza danych osób)
@@ -50,7 +49,10 @@ import org.springframework.web.bind.annotation.RestController;
 //Dlatego można je usunąć adnotacją: @CrossOrigin(maxAge = 3600) (3600 oznacza na jaki czas wyłączamy, tj. liczbę sekund wyłaczenia)
 
 
-@CrossOrigin(maxAge = 3600)
+@CrossOrigin(allowCredentials = "true", //Włączenie poświadczeń (nazwa uzytkownika i haslo
+        origins = "http://localhost:3000", //Okreslenie adresów, z których dopuszcza sie ruch sieciowy
+        allowedHeaders = {"Authorization","Content-Type"}, //Nagłówki dopuszczalne
+        maxAge = 3600, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 public class MyController2 {
 
@@ -72,22 +74,20 @@ public class MyController2 {
         return "Testowy serwis webowy";
     }
 
-
-    @RequestMapping(value = "/addwyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/addwyp", method = RequestMethod.POST)
     public ResponseEntity<String> addWyp(@RequestBody String jsonString)
     {
 
         try {
-
             JSONObject obj = new JSONObject(jsonString);
+            JSONObject params = obj.getJSONObject("params");
 
-            String czytelnikId = obj.getString("czytelnikId");
-            String ksiazkaID = obj.getString("ksiazkaId");
-            String date = obj.getString("date");
-
+            String czytelnikId = params.getString("czytelnikId");
+            String ksiazkaId = params.getString("ksiazkaId");
+            String date = params.getString("date");
 
             Czytelnik czytelnik = czytelnikRepository.findById(Integer.parseInt(czytelnikId));
-            Ksiazka ksiazka = ksiazkiRepository.findById(Integer.parseInt(ksiazkaID));
+            Ksiazka ksiazka = ksiazkiRepository.findById(Integer.parseInt(ksiazkaId));
 
             Wypozyczenie wypozyczenie = new Wypozyczenie(date);
             wypozyczenie.setCzytelnik(czytelnik);
@@ -111,12 +111,10 @@ public class MyController2 {
     }
 
 
-    @RequestMapping(value = "/getwyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/getwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getWyp(ServletRequest request) {
         try
         {
-
-            //List<Transfer> transferList = transferRepository.findByUsername(userName);
             List<Wypozyczenie> wypList = wypRepository.findAll();
 
             if (wypList==null)
@@ -148,7 +146,7 @@ public class MyController2 {
         }
     }
 
-    @RequestMapping(value = "/getunreturnedwyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/getunreturnedwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getUnreturnedWyp(ServletRequest request) {
 
         try
@@ -186,7 +184,7 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/getreturnedwyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/getreturnedwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getReturnedWyp(ServletRequest request) {
 
         try
@@ -224,14 +222,13 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/getczytelnikwyp", method = RequestMethod.POST)
-    public ResponseEntity<ArrayList<WWypozyczenie>> getCzytelnikWyp(@RequestBody String jsonString) {
+    @RequestMapping(value = "/client/getczytelnikwyp", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<WWypozyczenie>> getCzytelnikWyp(@RequestParam String czytelnikidtofind) {
 
         try
         {
 
-            JSONObject obj = new JSONObject(jsonString);
-            String czytelnikid = obj.getString("czytelnikidtofind");
+            String czytelnikid = czytelnikidtofind;
             int intczytelnikid = Integer.parseInt(czytelnikid);
 
 
@@ -266,14 +263,12 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/getksiazkawyp", method = RequestMethod.POST)
-    public ResponseEntity<ArrayList<WWypozyczenie>> getKsiazkaWyp(@RequestBody String jsonString) {
+    @RequestMapping(value = "/client/getksiazkawyp", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<WWypozyczenie>> getKsiazkaWyp(@RequestParam String ksiazkaidtofind) {
 
         try
         {
-
-            JSONObject obj = new JSONObject(jsonString);
-            String ksiazkaid = obj.getString("ksiazkaidtofind");
+            String ksiazkaid = ksiazkaidtofind;
             int intksiazkaid = Integer.parseInt(ksiazkaid);
 
 
@@ -308,13 +303,15 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/deletewyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/deletewyp", method = RequestMethod.POST)
     public ResponseEntity<String> deleteWyp(@RequestBody String jsonString) {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            String wypidtodelete = obj.getString("wypidtodelete");
+            JSONObject param = new JSONObject(obj.getString("params"));
+
+            String wypidtodelete = param.getString("wypidtodelete");
             int intWypidtodelete = Integer.parseInt(wypidtodelete);
 
 
@@ -339,13 +336,14 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/deleteczytelnik", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/deleteczytelnik", method = RequestMethod.POST)
     public ResponseEntity<String> deleteCzytelnik(@RequestBody String jsonString) {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            String wypidtodelete = obj.getString("czytidtodelete");
+            JSONObject param = new JSONObject(obj.getString("params"));
+            String wypidtodelete = param.getString("czytidtodelete");
             int intWypidtodelete = Integer.parseInt(wypidtodelete);
 
 
@@ -374,13 +372,14 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/deleteksiazka", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/deleteksiazka", method = RequestMethod.POST)
     public ResponseEntity<String> deleteKsiazka(@RequestBody String jsonString) {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            String wypidtodelete = obj.getString("ksidtodelete");
+            JSONObject param = new JSONObject(obj.getString("params"));
+            String wypidtodelete = param.getString("ksidtodelete");
             int intWypidtodelete = Integer.parseInt(wypidtodelete);
 
 
@@ -409,13 +408,14 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/endwyp", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/endwyp", method = RequestMethod.POST)
     public ResponseEntity<String> endWyp(@RequestBody String jsonString) {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            String wypidtoend = obj.getString("wypidtoend");
+            JSONObject param = new JSONObject(obj.getString("params"));
+            String wypidtoend = param.getString("wypidtoend");
             int intWypidtoend = Integer.parseInt(wypidtoend);
 
 
@@ -445,7 +445,7 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/getksiazki", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/getksiazki", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<KKsiazka>> getKsiazki(ServletRequest request) {
 
         try
@@ -482,18 +482,18 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/addksiazka", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/addksiazka", method = RequestMethod.POST)
     public ResponseEntity<String> addKasiazka(@RequestBody String jsonString)
     {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            //int ID = obj.getInt("ID");
+            JSONObject param = new JSONObject(obj.getString("params"));
 
-            String title = obj.getString("title");
-            String author = obj.getString("author");
-            String isbn = obj.getString("isbn");
+            String title = param.getString("title");
+            String author = param.getString("author");
+            String isbn = param.getString("isbn");
 
 
             Ksiazka ksiazka = new Ksiazka(title,  author,isbn);
@@ -514,18 +514,17 @@ public class MyController2 {
         }
 
     }
-    @RequestMapping(value = "/addczytelnik", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/addczytelnik", method = RequestMethod.POST)
     public ResponseEntity<String> addCzytelnik(@RequestBody String jsonString)
     {
 
         try {
 
             JSONObject obj = new JSONObject(jsonString);
-            //int ID = obj.getInt("ID");
+            JSONObject param = new JSONObject(obj.getString("params"));
 
-
-            String firstname = obj.getString("firstname");
-            String lastname = obj.getString("lastname");
+            String firstname = param.getString("firstname");
+            String lastname = param.getString("lastname");
 
             Czytelnik czytelnik = new Czytelnik(firstname,  lastname);
 
@@ -545,7 +544,7 @@ public class MyController2 {
         }
 
     }
-    @RequestMapping(value = "/getczytelnicy", method = RequestMethod.POST)
+    @RequestMapping(value = "/client/getczytelnicy", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<CCzytelnik>> getCzytelnicy(ServletRequest request) {
 
         try
@@ -583,7 +582,7 @@ public class MyController2 {
         }
     }
 
-    @RequestMapping(value = "/getlogs", method = RequestMethod.POST)
+    @RequestMapping(value = "/admin/getlogs", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<MyLogRecord>> getLogs(ServletRequest request) {
 
         try
@@ -610,13 +609,12 @@ public class MyController2 {
         }
     }
 
-    @RequestMapping(value = "/getlogsbystring", method = RequestMethod.POST)
-    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByString(@RequestBody String jsonString) {
-
+    @RequestMapping(value = "/admin/getlogsbystring", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByString(@RequestParam String logstringtofind) {
         try
         {
-            JSONObject obj = new JSONObject(jsonString);
-            String stringToFind = obj.getString("logstringtofind").toLowerCase();
+            //JSONObject obj = new JSONObject(jsonString);
+            String stringToFind = logstringtofind.toLowerCase();
 
 
             ArrayList<MyLogRecord> logList = (ArrayList<MyLogRecord>) myLogRecordRepository.findAll();
@@ -649,15 +647,16 @@ public class MyController2 {
             return res;
         }
     }
-    @RequestMapping(value = "/getlogbydate", method = RequestMethod.POST)
-    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByDate(@RequestBody String jsonString) {
+    @RequestMapping(value = "/admin/getlogbydate", method = RequestMethod.GET)
+    public ResponseEntity<ArrayList<MyLogRecord>> getLogsByDate(@RequestParam String logstringtofind
+            ,@RequestParam String logbegindate,@RequestParam String logenddate) {
 
         try
         {
-            JSONObject obj = new JSONObject(jsonString);
-            String stringToFind = obj.getString("logstringtofind").toLowerCase();
-            String beginDateToFind = obj.getString("logbegindate");
-            String endDateToFind = obj.getString("logenddate");
+            //JSONObject obj = new JSONObject(jsonString);
+            String stringToFind = logstringtofind.toLowerCase();
+            String beginDateToFind = logbegindate;
+            String endDateToFind = logenddate;
             if (beginDateToFind.isBlank()) beginDateToFind="1970-01-01 00:00:00";
             if (endDateToFind.isBlank()) endDateToFind="2200-12-31 23:59:59";
 
@@ -686,14 +685,6 @@ public class MyController2 {
                     }
                 }
             }
-//            for (int i=0; i < foundLogList.size(); i++){
-//                MyLogRecord log = foundLogList.get(i);
-//                if(dateFormat.parse(log.getTimestamp()).before(begindate) || dateFormat.parse(log.getTimestamp()).after(enddate)){
-//                    foundLogList.remove(log);
-//                    System.out.println(dateFormat.parse(log.getTimestamp()).before(begindate));
-//                    System.out.println(dateFormat.parse(log.getTimestamp()).before(enddate));
-//                }
-//            }
 
             foundLogList.removeIf(log -> {
                 try {

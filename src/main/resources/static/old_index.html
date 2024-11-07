@@ -16,8 +16,6 @@
 <body>
 <div id="Biblioteka"></div>
 
-</script>
-
 <script type="text/babel">
 
     function BibliotekaHook() {
@@ -46,8 +44,6 @@
         const [ksiazkaIDToFind, setKsiazkaIDToFind] = React.useState("1");
         const [ksiazkaIDToDelete, setKsiazkaIDToDelete] = React.useState("1");
         const [wypIDToEnd, setWypIDToEnd] = React.useState("1");
-        const [userName, setUserName] = React.useState("client");
-        const [password, setPassword] = React.useState("client123");
 
         //wypozyczenia na serwer
         async function addWypozyczenie() {
@@ -55,20 +51,10 @@
             let czytelnikId = newCzytelnikID;
             let ksiazkaId = newKsiazkaID;
             let date = newDate;
-            const credentials = `${userName}:${password}`;
-            const base64Credentials = btoa(credentials); // kodowanie na base64    
 //dodanie wypozyczenia
             if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
-                
-                await axios.post('http://localhost:8081/client/addwyp',{
-                params: {czytelnikId, ksiazkaId, date}, // Podajemy parametry
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                }
-            }
+                await axios.post('http://localhost:8081/addwyp',
+                    { czytelnikId, ksiazkaId, date }, //Podajemy parametry
                 )
                     .then(response => {
                         let text = response.data;
@@ -89,16 +75,8 @@ async function addCzytelnik() {
 
 //dodanie czytelnika
             if ((firstname.length > 0) && (lastname.length > 0) ) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64
-                await axios.post('http://localhost:8081/client/addczytelnik',
-                    {params: {firstname, lastname},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                }  }, //Podajemy parametry
+                await axios.post('http://localhost:8081/addczytelnik',
+                    { firstname, lastname}, //Podajemy parametry
                 )
                     .then(response => {
                         let text = response.data;
@@ -120,18 +98,8 @@ async function addCzytelnik() {
             let isbn = newISBN;
 
             if ((title.length > 0) && (author.length > 0) && (isbn.length > 0) ) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64
-
-                await axios.post('http://localhost:8081/client/addksiazka',
-                    { params: {title, author,isbn},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                } 
-            }, 
+                await axios.post('http://localhost:8081/addksiazka',
+                    { title, author,isbn}, //Podajemy parametry
                 )
                     .then(response => {
                         let text = response.data;
@@ -147,17 +115,10 @@ async function addCzytelnik() {
         }
  //Pobranie listy czytelnikow z serwera
         async function getCzytelnicy() {
-            const credentials = {username: userName, password: password};
-            await axios.get('http://localhost:8081/client/getczytelnicy',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+
+            await axios.post('http://localhost:8081/getczytelnicy')
                 .then(response => {
 
-                    
                     let wypListText = ""
 
                     response.data.forEach((e) => {
@@ -190,14 +151,8 @@ async function addCzytelnik() {
         }
          //Pobranie listy ksiazek z serwera
         async function getKsiazki() {
-            const credentials = {username: userName, password: password};
-            await axios.get('http://localhost:8081/client/getksiazki',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+
+            await axios.post('http://localhost:8081/getksiazki')
                 .then(response => {
 
                     let wypListText = ""
@@ -233,15 +188,7 @@ async function addCzytelnik() {
         //Pobranie listy wypozyczen z serwera
         async function getWypozyczenia() {
 
-            const credentials = { username: userName, password: password};
-
-            await axios.get('http://localhost:8081/client/getwyp',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+            await axios.post('http://localhost:8081/getwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -281,14 +228,8 @@ async function addCzytelnik() {
 
         //Pobranie listy logów z serwera
         async function getLogi() {
-            const credentials = { username: userName, password: password};
-await axios.get('http://localhost:8081/admin/getlogs',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+
+await axios.post('http://localhost:8081/getlogs')
     .then(response => {
 
         let wypListText = ""
@@ -324,14 +265,8 @@ await axios.get('http://localhost:8081/admin/getlogs',{
 
         //Pobranie listy wypozyczen z serwera
         async function getReturnedWypozyczenia() {
-            const credentials = { username: userName, password: password};
-            await axios.get('http://localhost:8081/client/getreturnedwyp',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+
+            await axios.post('http://localhost:8081/getreturnedwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -371,14 +306,8 @@ await axios.get('http://localhost:8081/admin/getlogs',{
 
         //Pobranie listy wypozyczen z serwera
         async function getUnreturnedWypozyczenia() {
-            const credentials = { username: userName, password: password};
-            await axios.get('http://localhost:8081/client/getunreturnedwyp',{
-                                params: {},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
+
+            await axios.post('http://localhost:8081/getunreturnedwyp')
                 .then(response => {
 
                     let wypListText = ""
@@ -421,17 +350,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             let czytidtodelete = czytelnikIDToDelete;
 
             if (czytidtodelete.length > 0) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('http://localhost:8081/admin/deleteczytelnik',
-                { params: {czytidtodelete},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                } 
-            }  , 
+
+                await axios.post('http://localhost:8081/deleteczytelnik',
+                    { czytidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
                         let text = response.data;
@@ -450,17 +371,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             let ksidtodelete = ksiazkaIDToDelete;
 
             if (ksidtodelete.length > 0) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('http://localhost:8081/admin/deleteksiazka',
-                { params: {ksidtodelete},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                } 
-            } , //Podajemy parametr
+
+                await axios.post('http://localhost:8081/deleteksiazka',
+                    { ksidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
                         let text = response.data;
@@ -479,17 +392,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             let wypidtodelete = wypIDToDelete;
 
             if (wypidtodelete.length > 0) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('http://localhost:8081/admin/deletewyp',
-                    { params: {wypidtodelete},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                } 
-            }, 
+
+                await axios.post('http://localhost:8081/deletewyp',
+                    { wypidtodelete }, //Podajemy parametr
                 )
                     .then(response => {
                         let text = response.data;
@@ -508,17 +413,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
 
             let wypidtoend = wypIDToEnd;
             if (wypidtoend.length > 0) {
-                const credentials = `${userName}:${password}`;
-                const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('http://localhost:8081/client/endwyp',
-                { params: {wypidtoend},
-                },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
-                } 
-            }, 
+
+                await axios.post('http://localhost:8081/endwyp',
+                    { wypidtoend }, //Podajemy parametry
                 )
                     .then(response => {
                         let text = response.data;
@@ -538,15 +435,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             setTextArea("");
             let czytelnikidtofind = czytelnikIDToFind;
             if (czytelnikidtofind.length > 0) {
-                const credentials = { username: userName, password: password};
-                await axios.get('http://localhost:8081/client/getczytelnikwyp',
-                    {
-                                params: {czytelnikidtofind},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            }   //Podajemy parametry
+
+                await axios.post('http://localhost:8081/getczytelnikwyp',
+                    { czytelnikidtofind }, //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -593,15 +484,9 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             setTextArea("");
             let ksiazkaidtofind = ksiazkaIDToFind;
             if (ksiazkaidtofind.length > 0) {
-                const credentials = { username: userName, password: password};
-                await axios.get('http://localhost:8081/client/getksiazkawyp',
-                    { 
-                                params: {ksiazkaidtofind },
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            }, //Podajemy parametry
+
+                await axios.post('http://localhost:8081/getksiazkawyp',
+                    { ksiazkaidtofind }, //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -647,14 +532,10 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             setLogi([]);
             setTextArea("");
             let logstringtofind = newFindLogText;
+            
 
-            const credentials = { username: userName, password: password};
-                await axios.get('http://localhost:8081/admin/getlogsbystring',
-                    { params: {logstringtofind},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                } } //Podajemy parametry
+                await axios.post('http://localhost:8081/getlogsbystring',
+                    { logstringtofind }, //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -662,8 +543,8 @@ await axios.get('http://localhost:8081/admin/getlogs',{
                         let lid = e.id;
                         let ltimestamp = e.timestamp;
                         let llevel = e.level;
-                        let lmessage = e.message;
-
+                        let lmessage = e.message;                   
+                    
                         let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
 
                         if (firstPartText !== "ERROR:") {
@@ -678,13 +559,13 @@ await axios.get('http://localhost:8081/admin/getlogs',{
                             setTextArea(wypListText);
                             setStatus(secondPartText);
                         }
-
+                    
                     })
 
                     }).catch(err => {
                         let myerror = "Blad polaczenia sieciowego." + err;
                         setStatus(myerror);
-                    });
+                    });                                
         }
 
         async function findLogByDate() {
@@ -693,14 +574,10 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             let logstringtofind = newFindLogText;
             let logbegindate = newFindLogBeginDate;
             let logenddate = newFindLogEndDate;
+            
 
-            const credentials = { username: userName, password: password};
-                await axios.get('http://localhost:8081/admin/getlogbydate',
-                    {params: { logstringtofind, logbegindate, logenddate},
-                                auth: credentials,
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }} //Podajemy parametry
+                await axios.post('http://localhost:8081/getlogbydate',
+                    { logstringtofind, logbegindate, logenddate}, //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -708,8 +585,8 @@ await axios.get('http://localhost:8081/admin/getlogs',{
                         let lid = e.id;
                         let ltimestamp = e.timestamp;
                         let llevel = e.level;
-                        let lmessage = e.message;
-
+                        let lmessage = e.message;                   
+                    
                         let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
 
                         if (firstPartText !== "ERROR:") {
@@ -724,14 +601,14 @@ await axios.get('http://localhost:8081/admin/getlogs',{
                             setTextArea(wypListText);
                             setStatus(secondPartText);
                         }
-
+                    
                     })
 
                     }).catch(err => {
                         let myerror = "Blad polaczenia sieciowego." + err;
                         setStatus(myerror);
                     });
-
+                  
         }
 
 
@@ -775,7 +652,7 @@ await axios.get('http://localhost:8081/admin/getlogs',{
             <div>
                 <img src="baner.png" alt="Banner" />
                 <div class="container">
-                    <p>Jesteś zalogowany jako: {userName}</p>
+
                     <h3>Status: {status}</h3>
                 </div>
 
