@@ -10,14 +10,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />    
 </head>
 
 <body>
 <div id="Biblioteka"></div>
 
-<script type="text/babel">
+</script>
 
+<script type="text/babel">
+    
     function BibliotekaHook() {
 
         const [status, setStatus] = React.useState("OK");
@@ -44,39 +46,63 @@
         const [ksiazkaIDToFind, setKsiazkaIDToFind] = React.useState("1");
         const [ksiazkaIDToDelete, setKsiazkaIDToDelete] = React.useState("1");
         const [wypIDToEnd, setWypIDToEnd] = React.useState("1");
+        const [inputUserName, setInputUserName] = React.useState("");
+        const [inputPassword, setInputPassword] = React.useState("");
+        const [userName, setUserName] = React.useState("");
+        const [password, setPassword] = React.useState("");
+        const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
         //wypozyczenia na serwer
         async function addWypozyczenie() {
-
-            let czytelnikId = newCzytelnikID;
-            let ksiazkaId = newKsiazkaID;
-            let date = newDate;
-//dodanie wypozyczenia
-            if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
-                await axios.post('http://localhost:8081/addwyp',
-                    { czytelnikId, ksiazkaId, date }, //Podajemy parametry
-                )
-                    .then(response => {
-                        let text = response.data;
-                        setStatus(text);
-                    }).catch(err => {
-                        let myerror = "Blad polaczenia sieciowego." + err;
-                        setStatus(myerror);
-                    });
-            }
-            else {
-                setStatus("Zadna z danych wstawianego wypozyczenia nie moze byc pusta");
-            }
+        if(isLoggedIn){
+                let czytelnikId = newCzytelnikID;
+                let ksiazkaId = newKsiazkaID;
+                let date = newDate;
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64    
+    //dodanie wypozyczenia
+                if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
+                    
+                    await axios.post('http://localhost:8081/client/addwyp',{
+                    params: {czytelnikId, ksiazkaId, date}, // Podajemy parametry
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                    }
+                }
+                    )
+                        .then(response => {
+                            let text = response.data;
+                            setStatus(text);
+                        }).catch(err => {
+                            let myerror = "Blad polaczenia sieciowego." + err;
+                            setStatus(myerror);
+                        });
+                }
+                else {
+                    setStatus("Zadna z danych wstawianego wypozyczenia nie moze byc pusta");
+                }
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
 async function addCzytelnik() {
-
+if(isLoggedIn){
             let firstname = newFirstname;
             let lastname = newLastname;
 
 //dodanie czytelnika
             if ((firstname.length > 0) && (lastname.length > 0) ) {
-                await axios.post('http://localhost:8081/addczytelnik',
-                    { firstname, lastname}, //Podajemy parametry
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64
+                await axios.post('http://localhost:8081/client/addczytelnik',
+                    {params: {firstname, lastname},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                }  }, //Podajemy parametry
                 )
                     .then(response => {
                         let text = response.data;
@@ -89,17 +115,28 @@ async function addCzytelnik() {
             else {
                 setStatus("Zadna z danych dodawanego czytelnika nie moze byc pusta");
             }
+        }else { setStatus("Musisz się najpierw zalogować!");}
         }
         //dodanie ksiazki
         async function addKsiazka() {
-
+if(isLoggedIn){
             let title = newTitle;
             let author = newAuthor;
             let isbn = newISBN;
 
             if ((title.length > 0) && (author.length > 0) && (isbn.length > 0) ) {
-                await axios.post('http://localhost:8081/addksiazka',
-                    { title, author,isbn}, //Podajemy parametry
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64
+
+                await axios.post('http://localhost:8081/client/addksiazka',
+                    { params: {title, author,isbn},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                } 
+            }, 
                 )
                     .then(response => {
                         let text = response.data;
@@ -112,13 +149,22 @@ async function addCzytelnik() {
             else {
                 setStatus("Zadna z danych dodawanej książki nie moze byc pusta");
             }
+        }else { setStatus("Musisz się najpierw zalogować!");}
         }
  //Pobranie listy czytelnikow z serwera
         async function getCzytelnicy() {
-
-            await axios.post('http://localhost:8081/getczytelnicy')
+            if(isLoggedIn){
+            const credentials = {username: userName, password: password};
+            await axios.get('http://localhost:8081/client/getczytelnicy',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
                 .then(response => {
 
+                    
                     let wypListText = ""
 
                     response.data.forEach((e) => {
@@ -147,12 +193,20 @@ async function addCzytelnik() {
                     let myerror = "Blad polaczenia sieciowego." + err;
                     setStatus(myerror);
                 });
+            }else { setStatus("Musisz się najpierw zalogować!");}
 
         }
          //Pobranie listy ksiazek z serwera
         async function getKsiazki() {
-
-            await axios.post('http://localhost:8081/getksiazki')
+            if(isLoggedIn){
+            const credentials = {username: userName, password: password};
+            await axios.get('http://localhost:8081/client/getksiazki',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
                 .then(response => {
 
                     let wypListText = ""
@@ -183,12 +237,20 @@ async function addCzytelnik() {
                     let myerror = "Blad polaczenia sieciowego." + err;
                     setStatus(myerror);
                 });
-
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
         //Pobranie listy wypozyczen z serwera
         async function getWypozyczenia() {
+            if(isLoggedIn){
+            const credentials = { username: userName, password: password};
 
-            await axios.post('http://localhost:8081/getwyp')
+            await axios.get('http://localhost:8081/client/getwyp',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
                 .then(response => {
 
                     let wypListText = ""
@@ -223,50 +285,64 @@ async function addCzytelnik() {
                     let myerror = "Blad polaczenia sieciowego." + err;
                     setStatus(myerror);
                 });
-
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
         //Pobranie listy logów z serwera
         async function getLogi() {
-
-await axios.post('http://localhost:8081/getlogs')
+            if(isLoggedIn){
+            const credentials = { username: userName, password: password};
+await axios.get('http://localhost:8081/admin/getlogs',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
     .then(response => {
 
         let wypListText = ""
 
-        response.data.forEach((e) => {
-            let lid = e.id;
-            let ltimestamp = e.timestamp;
-            let llevel = e.level;
-            let lmessage = e.message;
+            response.data.forEach((e) => {
+                let lid = e.id;
+                let ltimestamp = e.timestamp;
+                let llevel = e.level;
+                let lmessage = e.message;
 
-            let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
+                let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
 
-            if (firstPartText !== "ERROR:") {
-                wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
-                setTextArea(wypListText);
-                setLogi(response.data);
-                setStatus("OK");
-            }
-            else {
-                let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
-                wypListText = ltimestamp + "\n";
-                setTextArea(wypListText);
-                setStatus(secondPartText);
-            }
-        })
+                if (firstPartText !== "ERROR:") {
+                    wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
+                    setTextArea(wypListText);
+                    setLogi(response.data);
+                    setStatus("OK");
+                }
+                else {
+                    let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
+                    wypListText = ltimestamp + "\n";
+                    setTextArea(wypListText);
+                    setStatus(secondPartText);
+                }
+            })
 
-    }).catch(err => {
-        let myerror = "Blad polaczenia sieciowego." + err;
-        setStatus(myerror);
-    });
-
+        }).catch(err => {
+            let myerror = "Blad polaczenia sieciowego." + err;
+            setStatus(myerror);
+        });
+            }else { setStatus("Musisz się najpierw zalogować!");}
 }
 
         //Pobranie listy wypozyczen z serwera
         async function getReturnedWypozyczenia() {
-
-            await axios.post('http://localhost:8081/getreturnedwyp')
+            if(isLoggedIn){
+            const credentials = { username: userName, password: password};
+            await axios.get('http://localhost:8081/client/getreturnedwyp',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
                 .then(response => {
 
                     let wypListText = ""
@@ -301,13 +377,20 @@ await axios.post('http://localhost:8081/getlogs')
                     let myerror = "Blad polaczenia sieciowego." + err;
                     setStatus(myerror);
                 });
-
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
         //Pobranie listy wypozyczen z serwera
         async function getUnreturnedWypozyczenia() {
-
-            await axios.post('http://localhost:8081/getunreturnedwyp')
+            if(isLoggedIn){
+            const credentials = { username: userName, password: password};
+            await axios.get('http://localhost:8081/client/getunreturnedwyp',{
+                                params: {},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
                 .then(response => {
 
                     let wypListText = ""
@@ -342,17 +425,25 @@ await axios.post('http://localhost:8081/getlogs')
                     let myerror = "Blad polaczenia sieciowego." + err;
                     setStatus(myerror);
                 });
-
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
         async function deleteCzytelnik() {
-
+            if(isLoggedIn){
             let czytidtodelete = czytelnikIDToDelete;
 
             if (czytidtodelete.length > 0) {
-
-                await axios.post('http://localhost:8081/deleteczytelnik',
-                    { czytidtodelete }, //Podajemy parametr
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64 
+                await axios.post('http://localhost:8081/admin/deleteczytelnik',
+                { params: {czytidtodelete},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                } 
+            }  , 
                 )
                     .then(response => {
                         let text = response.data;
@@ -365,15 +456,24 @@ await axios.post('http://localhost:8081/getlogs')
             else {
                 setStatus("ID czytelnika nie moze być puste!");
             }
+        }else { setStatus("Musisz się najpierw zalogować!");}
         }
         async function deleteKsiazka() {
-
+            if(isLoggedIn){
             let ksidtodelete = ksiazkaIDToDelete;
 
             if (ksidtodelete.length > 0) {
-
-                await axios.post('http://localhost:8081/deleteksiazka',
-                    { ksidtodelete }, //Podajemy parametr
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64 
+                await axios.post('http://localhost:8081/admin/deleteksiazka',
+                { params: {ksidtodelete},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                } 
+            } , //Podajemy parametr
                 )
                     .then(response => {
                         let text = response.data;
@@ -387,14 +487,23 @@ await axios.post('http://localhost:8081/getlogs')
                 setStatus("ID ksiazki nie moze być puste!");
             }
         }
+        }
         async function deleteWypozyczenie() {
-
+            if(isLoggedIn){
             let wypidtodelete = wypIDToDelete;
 
             if (wypidtodelete.length > 0) {
-
-                await axios.post('http://localhost:8081/deletewyp',
-                    { wypidtodelete }, //Podajemy parametr
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64 
+                await axios.post('http://localhost:8081/admin/deletewyp',
+                    { params: {wypidtodelete},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                } 
+            }, 
                 )
                     .then(response => {
                         let text = response.data;
@@ -408,14 +517,23 @@ await axios.post('http://localhost:8081/getlogs')
                 setStatus("ID wypozyczenia nie moze być puste!");
             }
         }
+        }
 
         async function endWypozyczenie() {
-
+            if(isLoggedIn){
             let wypidtoend = wypIDToEnd;
             if (wypidtoend.length > 0) {
-
-                await axios.post('http://localhost:8081/endwyp',
-                    { wypidtoend }, //Podajemy parametry
+                const credentials = `${userName}:${password}`;
+                const base64Credentials = btoa(credentials); // kodowanie na base64 
+                await axios.post('http://localhost:8081/client/endwyp',
+                { params: {wypidtoend},
+                },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${base64Credentials}` // Dodanie nagłówka autoryzacji
+                } 
+            }, 
                 )
                     .then(response => {
                         let text = response.data;
@@ -428,16 +546,24 @@ await axios.post('http://localhost:8081/getlogs')
             else {
                 setStatus("ID zakończenia wypożyczenia nie moze być puste!");
             }
+        } else { setStatus("Musisz się najpierw zalogować!");}
         }
 
         async function findWypozyczenieByCzytelnik() {
+            if(isLoggedIn){
             setWypozyczenia([]);
             setTextArea("");
             let czytelnikidtofind = czytelnikIDToFind;
             if (czytelnikidtofind.length > 0) {
-
-                await axios.post('http://localhost:8081/getczytelnikwyp',
-                    { czytelnikidtofind }, //Podajemy parametry
+                const credentials = { username: userName, password: password};
+                await axios.get('http://localhost:8081/client/getczytelnikwyp',
+                    {
+                                params: {czytelnikidtofind},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }   //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -477,16 +603,24 @@ await axios.post('http://localhost:8081/getlogs')
             else {
                 setStatus("ID czytelnika nie moze być puste!");
             }
+        }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
                 async function findWypozyczenieByKsiazka() {
+                    if(isLoggedIn){
             setWypozyczenia([]);
             setTextArea("");
             let ksiazkaidtofind = ksiazkaIDToFind;
             if (ksiazkaidtofind.length > 0) {
-
-                await axios.post('http://localhost:8081/getksiazkawyp',
-                    { ksiazkaidtofind }, //Podajemy parametry
+                const credentials = { username: userName, password: password};
+                await axios.get('http://localhost:8081/client/getksiazkawyp',
+                    { 
+                                params: {ksiazkaidtofind },
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }, //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -526,16 +660,22 @@ await axios.post('http://localhost:8081/getlogs')
             else {
                 setStatus("ID książki nie moze być puste!");
             }
+        }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
         async function findLog() {
+            if(isLoggedIn){
             setLogi([]);
             setTextArea("");
             let logstringtofind = newFindLogText;
-            
 
-                await axios.post('http://localhost:8081/getlogsbystring',
-                    { logstringtofind }, //Podajemy parametry
+            const credentials = { username: userName, password: password};
+                await axios.get('http://localhost:8081/admin/getlogsbystring',
+                    { params: {logstringtofind},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                } } //Podajemy parametry
                 )
                     .then(response => {
                     	let wypListText = ""
@@ -543,8 +683,8 @@ await axios.post('http://localhost:8081/getlogs')
                         let lid = e.id;
                         let ltimestamp = e.timestamp;
                         let llevel = e.level;
-                        let lmessage = e.message;                   
-                    
+                        let lmessage = e.message;
+
                         let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
 
                         if (firstPartText !== "ERROR:") {
@@ -559,56 +699,62 @@ await axios.post('http://localhost:8081/getlogs')
                             setTextArea(wypListText);
                             setStatus(secondPartText);
                         }
-                    
-                    })
 
-                    }).catch(err => {
-                        let myerror = "Blad polaczenia sieciowego." + err;
-                        setStatus(myerror);
-                    });                                
-        }
-
-        async function findLogByDate() {
-            setLogi([]);
-            setTextArea("");
-            let logstringtofind = newFindLogText;
-            let logbegindate = newFindLogBeginDate;
-            let logenddate = newFindLogEndDate;
-            
-
-                await axios.post('http://localhost:8081/getlogbydate',
-                    { logstringtofind, logbegindate, logenddate}, //Podajemy parametry
-                )
-                    .then(response => {
-                    	let wypListText = ""
-                        response.data.forEach((e) => {
-                        let lid = e.id;
-                        let ltimestamp = e.timestamp;
-                        let llevel = e.level;
-                        let lmessage = e.message;                   
-                    
-                        let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
-
-                        if (firstPartText !== "ERROR:") {
-                            wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
-                            setTextArea(wypListText);
-                            setLogi(response.data);
-                            setStatus("OK");
-                        }
-                        else {
-                            let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
-                            wypListText = ltimestamp + "\n";
-                            setTextArea(wypListText);
-                            setStatus(secondPartText);
-                        }
-                    
                     })
 
                     }).catch(err => {
                         let myerror = "Blad polaczenia sieciowego." + err;
                         setStatus(myerror);
                     });
-                  
+                }else { setStatus("Musisz się najpierw zalogować!");}
+        }
+
+        async function findLogByDate() {
+            if(isLoggedIn){
+            setLogi([]);
+            setTextArea("");
+            let logstringtofind = newFindLogText;
+            let logbegindate = newFindLogBeginDate;
+            let logenddate = newFindLogEndDate;
+
+            const credentials = { username: userName, password: password};
+                await axios.get('http://localhost:8081/admin/getlogbydate',
+                    {params: { logstringtofind, logbegindate, logenddate},
+                                auth: credentials,
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }} //Podajemy parametry
+                )
+                    .then(response => {
+                    	let wypListText = ""
+                        response.data.forEach((e) => {
+                        let lid = e.id;
+                        let ltimestamp = e.timestamp;
+                        let llevel = e.level;
+                        let lmessage = e.message;
+
+                        let firstPartText = ltimestamp.substring(0, ("ERROR:").length);
+
+                        if (firstPartText !== "ERROR:") {
+                            wypListText = wypListText + ltimestamp + ", " + llevel + ", " + lmessage + "\n";
+                            setTextArea(wypListText);
+                            setLogi(response.data);
+                            setStatus("OK");
+                        }
+                        else {
+                            let secondPartText = ltimestamp.substring(("ERROR:").length, ltimestamp.length);
+                            wypListText = ltimestamp + "\n";
+                            setTextArea(wypListText);
+                            setStatus(secondPartText);
+                        }
+
+                    })
+
+                    }).catch(err => {
+                        let myerror = "Blad polaczenia sieciowego." + err;
+                        setStatus(myerror);
+                    });
+            }else { setStatus("Musisz się najpierw zalogować!");}
         }
 
 
@@ -645,24 +791,40 @@ await axios.post('http://localhost:8081/getlogs')
             }
             event.preventDefault();
         }
-
+        const handleLoginClick = () => {
+        setUserName(inputUserName);
+        setPassword(inputPassword);
+        setInputUserName("");
+        setInputPassword("");
+        setIsLoggedIn(true);
+        };
+        const handleLogoutClick = () => {
+        setUserName("");
+        setPassword("");
+        setIsLoggedIn(false);
+        };
 
         return (
 
-            <div>
+        <div>
                 <img src="baner.png" alt="Banner" />
                 <div class="container">
-
+                    <p>{userName ? `Jesteś zalogowany jako: ${userName}` : "Nie jesteś aktualnie zalogowany. Zaloguj się!"}
+                {userName && (
+                <button onClick={handleLogoutClick} style={{ marginLeft: '10px' }}>Wyloguj</button>)}
+                    </p>           
                     <h3>Status: {status}</h3>
                 </div>
 
                 <div class="container">
-    <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#menu1" onClick={handleTabClick1}>Info</a></li>
-        <li><a data-toggle="tab" href="#menu2" onClick={handleTabClick1}>Wypożyczenia</a></li>
-        <li><a data-toggle="tab" href="#menu3" onClick={handleTabClick1}>Czytelnicy</a></li>
-        <li><a data-toggle="tab" href="#menu4" onClick={handleTabClick1}>Książki</a></li>
-        <li><a data-toggle="tab" href="#menu5" onClick={handleTabClick1}>Logi</a></li>
+        <li ><a data-toggle="tab" href="#menu2" onClick={handleTabClick1}>Wypożyczenia</a></li>
+        <li ><a data-toggle="tab" href="#menu3" onClick={handleTabClick1}>Czytelnicy</a></li>
+        <li ><a data-toggle="tab" href="#menu4" onClick={handleTabClick1}>Książki</a></li>
+        <li ><a data-toggle="tab" href="#menu5" onClick={handleTabClick1}>Logi</a></li>
+
+
     </ul>
 </div>
 
@@ -670,8 +832,14 @@ await axios.post('http://localhost:8081/getlogs')
                     <div id="menu1" class="tab-pane fade in active">
                             <div class="container">
                         <h2>Klient dostępu do obsługi wypożyczeń z użyciem REST </h2>
-                        <h3>Michał Pasieka</h3>
-                        <h3>Informatyka, 3 rok PANS w Krośnie</h3>
+                        <p>Login</p>
+                        <input type="text" name='login' value={inputUserName} onChange={(e) => setInputUserName(e.target.value)} />
+                        <p>Hasło</p>
+                        <input type="text" name='password' value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} />
+                        <p></p>
+                        <button type="button" class="btn btn-primary btn-lg" onClick={handleLoginClick}><i class="bi bi-database-fill-down"></i>  Zaloguj </button>
+                        <hr></hr>               
+                        <p>Michał Pasieka Informatyka, 4 rok PANS w Krośnie</p>
                              </div>
                     </div>
                     <div id="menu2" class="tab-pane fade">
