@@ -21,7 +21,7 @@ public static void main(String[] args) {
             RestTemplate restTemplate = new RestTemplate();
             httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                         
-            String url = MY_GLOBAL.adress+"/getwyp";
+            String url = MY_GLOBAL.adress+"getwyp";
                         
             ParameterizedTypeReference<List<WWypozyczenie>>  parameterizedTypeReference = new ParameterizedTypeReference<List<WWypozyczenie>>(){};
             ResponseEntity<List<WWypozyczenie>> res = restTemplate.exchange(url, HttpMethod.POST, null,parameterizedTypeReference);

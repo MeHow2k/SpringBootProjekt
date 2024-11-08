@@ -192,7 +192,7 @@ public class MyController2 {
 
             //List<Transfer> transferList = transferRepository.findByUsername(userName);
             List<Wypozyczenie> wypList = wypRepository.findAll();
-
+            System.out.println(wypList);
 
             if (wypList==null)
             {
@@ -205,9 +205,9 @@ public class MyController2 {
             {
                 Wypozyczenie wypozyczenia = wypList.get(i);
                 WWypozyczenie locWypozyczenia = new WWypozyczenie(wypozyczenia);
-                if(locWypozyczenia.getReturndate()!="nie oddano") locWypozyczeniaList.add(locWypozyczenia);
+                if(!locWypozyczenia.getReturndate().equals("nie oddano")) locWypozyczeniaList.add(locWypozyczenia);
             }
-
+            System.out.println(locWypozyczeniaList);
             ResponseEntity<ArrayList<WWypozyczenie>> res = new ResponseEntity(locWypozyczeniaList, HttpStatus.OK);
             return res;
 
@@ -423,21 +423,22 @@ public class MyController2 {
 
             if (locTransfer == null) {
                 throw new IllegalArgumentException("Nie ma w bazie wypozyczenia o id: " + wypidtoend);
-            }else if(locTransfer.getReturndate()!="nie oddano"){
+            }else if(!locTransfer.getReturndate().equals("nie oddano")){
                 throw new IllegalArgumentException("Wypożyczenie o id: " + wypidtoend+ " zostało już zwrócone!");
+            }else{
+
+                Date date = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                locTransfer.setReturndate(dateFormat.format(date));
+                wypRepository.save(locTransfer);
+
+                //log
+                String logString = "Zakończono wypożyczenie: "+ locTransfer.toString();
+                logger.info(logString);
+
+                ResponseEntity<String> res = new ResponseEntity("Zakończono wypozyczenie o id: "+wypidtoend, HttpStatus.OK);
+                return res;
             }
-
-            Date date = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            locTransfer.setReturndate(dateFormat.format(date));
-            wypRepository.save(locTransfer);
-
-            //log
-            String logString = "Zakończono wypożyczenie: "+ locTransfer.toString();
-            logger.info(logString);
-
-            ResponseEntity<String> res = new ResponseEntity("Zakończono wypozyczenie o id: "+wypidtoend, HttpStatus.OK);
-            return res;
         }
         catch (Exception e) {
             String text = new String(e.getMessage());
