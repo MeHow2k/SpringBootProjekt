@@ -192,7 +192,6 @@ public class MyController2 {
 
             //List<Transfer> transferList = transferRepository.findByUsername(userName);
             List<Wypozyczenie> wypList = wypRepository.findAll();
-            System.out.println(wypList);
 
             if (wypList==null)
             {
@@ -207,7 +206,7 @@ public class MyController2 {
                 WWypozyczenie locWypozyczenia = new WWypozyczenie(wypozyczenia);
                 if(!locWypozyczenia.getReturndate().equals("nie oddano")) locWypozyczeniaList.add(locWypozyczenia);
             }
-            System.out.println(locWypozyczeniaList);
+
             ResponseEntity<ArrayList<WWypozyczenie>> res = new ResponseEntity(locWypozyczeniaList, HttpStatus.OK);
             return res;
 
