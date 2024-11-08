@@ -832,12 +832,28 @@ await axios.get('http://localhost:8081/admin/getlogs',{
                     <div id="menu1" class="tab-pane fade in active">
                             <div class="container">
                         <h2>Klient dostępu do obsługi wypożyczeń z użyciem REST </h2>
-                        <p>Login</p>
-                        <input type="text" name='login' value={inputUserName} onChange={(e) => setInputUserName(e.target.value)} />
-                        <p>Hasło</p>
-                        <input type="text" name='password' value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} />
-                        <p></p>
-                        <button type="button" class="btn btn-primary btn-lg" onClick={handleLoginClick}><i class="bi bi-database-fill-down"></i>  Zaloguj </button>
+
+                        {!isLoggedIn && (
+                <>
+                    <p>Login</p>
+                    <input type="text" name="login" value={inputUserName} onChange={(e) => setInputUserName(e.target.value)}
+                    />
+                    <p>Hasło</p>
+                    <input type="password" name="password" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)}
+                    />
+                    <p></p>
+                    <button type="button" className="btn btn-primary btn-lg" onClick={handleLoginClick}>
+                        <i className="bi bi-database-fill-down"></i> Zaloguj</button>
+                </>
+            )}
+            {isLoggedIn && (
+                <>
+                <h3>Jesteś zalogowany jako: {userName}</h3>
+                <p></p>
+                <button type="button" className="btn btn-primary btn-lg" onClick={handleLogoutClick}>
+                    <i className="bi bi-database-fill-down"></i> Wyloguj</button>
+                </>
+            )}
                         <hr></hr>               
                         <p>Michał Pasieka Informatyka, 4 rok PANS w Krośnie</p>
                              </div>
