@@ -49,10 +49,10 @@ import org.springframework.web.bind.annotation.*;
 //Dlatego można je usunąć adnotacją: @CrossOrigin(maxAge = 3600) (3600 oznacza na jaki czas wyłączamy, tj. liczbę sekund wyłaczenia)
 
 
-@CrossOrigin(allowCredentials = "true", //Włączenie poświadczeń (nazwa uzytkownika i haslo
-        origins = "http://localhost:3000", //Okreslenie adresów, z których dopuszcza sie ruch sieciowy
-        allowedHeaders = {"Authorization","Content-Type"}, //Nagłówki dopuszczalne
-        maxAge = 3600, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
+//@CrossOrigin(allowCredentials = "true", //Włączenie poświadczeń (nazwa uzytkownika i haslo
+//        origins = "http://localhost:3000", //Okreslenie adresów, z których dopuszcza sie ruch sieciowy
+//        allowedHeaders = {"Authorization","Content-Type"}, //Nagłówki dopuszczalne
+//        maxAge = 3600, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 public class MyController2 {
 

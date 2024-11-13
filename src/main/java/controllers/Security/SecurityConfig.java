@@ -9,6 +9,8 @@ import controllers.models.DBUser;
 import controllers.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -64,7 +66,7 @@ public class SecurityConfig {
                 .cors(withDefaults())  // Umożliwia obsługę CORS
                 .csrf(csrf -> csrf.disable()) // Wyłączanie CSRF dla prostoty, w produkcji powinno być włączone
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/info","/*.png").permitAll()
+                        .requestMatchers("/", "/index.html", "/info","/*.png","/login").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/client/**").hasRole("CLIENT")
                         .anyRequest().authenticated()
@@ -82,6 +84,8 @@ public class SecurityConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000") // Dostosuj to do adresu twojej aplikacji front-end
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .exposedHeaders("*")
                         .allowCredentials(true);
             }
         };
