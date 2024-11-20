@@ -1,8 +1,5 @@
 package controllers;
 
-
-//To jest kontroler do przykładu z bankiem bez autoryzacji
-
 import common.CCzytelnik;
 import common.KKsiazka;
 import common.WWypozyczenie;
@@ -35,45 +32,58 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-
-//To jest kontroler do częsci aplikacji bez JWT (baza danych osób)
-
-//CORS (Cross-origin resource sharing) polega na tym, że domyślnie nie można w aplikacji pod danym adresem
-//wysłać zapytania do innej aplikacji sieciowej.
-//Mechanizm ten wprowadzono celem udaremnienia prób ataków na witryny internetowe typu Cross-site Request Forgery.
-//Atak ten polega na wysłaniu zapytania HTTP do innych serwisów wykorzystując uprawnienia użytkownika
-//np. stan zalogowania, inne dane zapisane w sesji lub w plikach cookie.
-
-//Zabezpieczenie to jednak przeszkadza w testowaniu aplikacji
-//Dlatego można je usunąć adnotacją: @CrossOrigin(maxAge = 3600) (3600 oznacza na jaki czas wyłączamy, tj. liczbę sekund wyłaczenia)
-
-
-//@CrossOrigin(allowCredentials = "true", //Włączenie poświadczeń (nazwa uzytkownika i haslo
-//        origins = "http://localhost:3000", //Okreslenie adresów, z których dopuszcza sie ruch sieciowy
-//        allowedHeaders = {"Authorization","Content-Type"}, //Nagłówki dopuszczalne
-//        maxAge = 3600, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
+/**
+ * Kontroler obsługujący żądania związane z wypożyczeniami książek, czytelnikami i książkami.
+ * Zapewnia metody do dodawania, pobierania i filtrowania wypożyczeń w systemie.
+ * Umożliwia również logowanie zdarzeń oraz obsługę błędów związanych z operacjami na danych.
+ *
+ * @author Michał Pasieka
+ * @version 1.0, 20.11.2024
+ */
 @RestController
 public class MyController2 {
-
+    /**
+     * Repozytorium dla wypożyczeń.
+     */
     @Autowired
     WypozyczenieRepository wypRepository;
+    /**
+     * Repozytorium dla książek.
+     */
     @Autowired
     KsiazkaRepository ksiazkiRepository;
+    /**
+     * Repozytorium dla czytelników.
+     */
     @Autowired
     CzytelnikRepository czytelnikRepository;
+    /**
+     * Repozytorium dla logów.
+     */
     @Autowired
     MyLogRecordRepository myLogRecordRepository;
+    /**
+     * Logger do zapisywania logów aplikacji.
+     */
 
     @Autowired
     private Logger logger;
-
+    /**
+     * Metoda zwracająca informację o systemie.
+     *
+     * @return informacja o systemie
+     */
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public String systemInfo() {
 
         return "Testowy serwis webowy";
     }
-
+    /**
+     * Metoda dodająca wypożyczenie książki do systemu.
+     *
+     * @param jsonString dane wypożyczenia w formacie JSON
+     * @return odpowiedź HTTP z informacją o powodzeniu lub błędzie operacji
+     */
     @RequestMapping(value = "/client/addwyp", method = RequestMethod.POST)
     public ResponseEntity<String> addWyp(@RequestBody String jsonString)
     {
@@ -109,7 +119,12 @@ public class MyController2 {
         }
 
     }
-
+    /**
+     * Metoda zwracająca listę wszystkich wypożyczeń.
+     *
+     * @param request obiekt żądania
+     * @return lista wypożyczeń w formacie JSON
+     */
 
     @RequestMapping(value = "/client/getwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getWyp(ServletRequest request) {
@@ -145,7 +160,12 @@ public class MyController2 {
             return res;
         }
     }
-
+    /**
+     * Metoda zwracająca listę wypożyczeń, które nie zostały zwrócone.
+     *
+     * @param request obiekt żądania
+     * @return lista wypożyczeń w formacie JSON
+     */
     @RequestMapping(value = "/client/getunreturnedwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getUnreturnedWyp(ServletRequest request) {
 
@@ -184,6 +204,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda zwracająca listę wypożyczeń, które zostały zwrócone.
+     *
+     * @param request obiekt żądania
+     * @return lista wypożyczeń w formacie JSON
+     */
     @RequestMapping(value = "/client/getreturnedwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getReturnedWyp(ServletRequest request) {
 
@@ -221,6 +247,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda zwracająca listę wypożyczeń dla danego czytelnika.
+     *
+     * @param czytelnikidtofind identyfikator czytelnika
+     * @return lista wypożyczeń w formacie JSON
+     */
     @RequestMapping(value = "/client/getczytelnikwyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getCzytelnikWyp(@RequestParam String czytelnikidtofind) {
 
@@ -262,6 +294,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda zwracająca listę wypożyczeń dla danej książki.
+     *
+     * @param ksiazkaidtofind identyfikator książki
+     * @return lista wypożyczeń w formacie JSON
+     */
     @RequestMapping(value = "/client/getksiazkawyp", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<WWypozyczenie>> getKsiazkaWyp(@RequestParam String ksiazkaidtofind) {
 
@@ -302,6 +340,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do usunięcia wypożyczenia z bazy danych.
+     *
+     * @param jsonString String w formacie JSON zawierający dane wypożyczenia do usunięcia
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/admin/deletewyp", method = RequestMethod.POST)
     public ResponseEntity<String> deleteWyp(@RequestBody String jsonString) {
 
@@ -335,6 +379,13 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do usunięcia czytelnika z bazy danych.
+     * Obsługuje wyjątek związany z naruszeniem integralności danych (np. powiązanie z wypożyczeniem).
+     *
+     * @param jsonString String w formacie JSON zawierający dane czytelnika do usunięcia
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/admin/deleteczytelnik", method = RequestMethod.POST)
     public ResponseEntity<String> deleteCzytelnik(@RequestBody String jsonString) {
 
@@ -371,6 +422,13 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do usunięcia książki z bazy danych.
+     * Obsługuje wyjątek związany z naruszeniem integralności danych (np. powiązanie z wypożyczeniem).
+     *
+     * @param jsonString String w formacie JSON zawierający dane książki do usunięcia
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/admin/deleteksiazka", method = RequestMethod.POST)
     public ResponseEntity<String> deleteKsiazka(@RequestBody String jsonString) {
 
@@ -407,6 +465,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do zakończenia wypożyczenia. Zaktualizuje datę zwrotu książki.
+     *
+     * @param jsonString String w formacie JSON zawierający dane wypożyczenia do zakończenia
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/client/endwyp", method = RequestMethod.POST)
     public ResponseEntity<String> endWyp(@RequestBody String jsonString) {
 
@@ -445,6 +509,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do pobierania listy książek z bazy danych.
+     *
+     * @param request obiekt ServletRequest, który może zawierać dodatkowe parametry żądania
+     * @return ResponseEntity odpowiedź zawierająca listę książek
+     */
     @RequestMapping(value = "/client/getksiazki", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<KKsiazka>> getKsiazki(ServletRequest request) {
 
@@ -482,6 +552,12 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do dodania nowej książki do bazy danych.
+     *
+     * @param jsonString String w formacie JSON zawierający dane książki do dodania
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/client/addksiazka", method = RequestMethod.POST)
     public ResponseEntity<String> addKasiazka(@RequestBody String jsonString)
     {
@@ -514,6 +590,12 @@ public class MyController2 {
         }
 
     }
+    /**
+     * Metoda służąca do dodania nowego czytelnika do bazy danych.
+     *
+     * @param jsonString String w formacie JSON zawierający dane czytelnika do dodania
+     * @return ResponseEntity odpowiedź zawierająca status operacji
+     */
     @RequestMapping(value = "/client/addczytelnik", method = RequestMethod.POST)
     public ResponseEntity<String> addCzytelnik(@RequestBody String jsonString)
     {
@@ -544,6 +626,12 @@ public class MyController2 {
         }
 
     }
+    /**
+     * Metoda służąca do pobierania listy czytelników z bazy danych.
+     *
+     * @param request obiekt ServletRequest, który może zawierać dodatkowe parametry żądania
+     * @return ResponseEntity odpowiedź zawierająca listę czytelników
+     */
     @RequestMapping(value = "/client/getczytelnicy", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<CCzytelnik>> getCzytelnicy(ServletRequest request) {
 
@@ -581,7 +669,12 @@ public class MyController2 {
             return res;
         }
     }
-
+    /**
+     * Metoda służąca do pobierania logów z systemu.
+     *
+     * @param request obiekt ServletRequest, który może zawierać dodatkowe parametry żądania
+     * @return ResponseEntity odpowiedź zawierająca listę logów
+     */
     @RequestMapping(value = "/admin/getlogs", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<MyLogRecord>> getLogs(ServletRequest request) {
 
@@ -608,7 +701,12 @@ public class MyController2 {
             return res;
         }
     }
-
+    /**
+     * Metoda służąca do wyszukiwania logów zawierających określony ciąg znaków.
+     *
+     * @param logstringtofind ciąg znaków do wyszukania w logach
+     * @return ResponseEntity odpowiedź zawierająca listę logów
+     */
     @RequestMapping(value = "/admin/getlogsbystring", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<MyLogRecord>> getLogsByString(@RequestParam String logstringtofind) {
         try
@@ -647,6 +745,14 @@ public class MyController2 {
             return res;
         }
     }
+    /**
+     * Metoda służąca do wyszukiwania logów w określonym przedziale czasowym oraz opcjonalnie zawierających określony ciąg znaków.
+     *
+     * @param logstringtofind ciąg znaków do wyszukania w logach
+     * @param logbegindate początkowa data do wyszukiwania
+     * @param logenddate końcowa data do wyszukiwania
+     * @return ResponseEntity odpowiedź zawierająca listę logów
+     */
     @RequestMapping(value = "/admin/getlogbydate", method = RequestMethod.GET)
     public ResponseEntity<ArrayList<MyLogRecord>> getLogsByDate(@RequestParam String logstringtofind
             ,@RequestParam String logbegindate,@RequestParam String logenddate) {

@@ -9,7 +9,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Arrays;
 import java.util.List;
-
+/**
+ * Komponent ładowania danych początkowych do bazy danych po uruchomieniu aplikacji.
+ * Ta klasa wypełnia bazę danych przykładowymi danymi, w tym książkami, czytelnikami, wypożyczeniami,
+ * logami oraz użytkownikami z odpowiednimi rolami.
+ * @author Michał Pasieka
+ * @version 1.0, 20.11.2024
+ */
 @Component
 public class DataLoader2 implements ApplicationRunner {
     private WypozyczenieRepository wypRepository;
@@ -19,7 +25,17 @@ public class DataLoader2 implements ApplicationRunner {
     private  UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-
+    /**
+     * Konstruktor wstrzykujący zależności dla repozytoriów oraz enkodera haseł.
+     *
+     * @param wypRepository Repozytorium do obsługi wypożyczeń
+     * @param ksiazkaRepository Repozytorium do obsługi książek
+     * @param czytelnikRepository Repozytorium do obsługi czytelników
+     * @param myLogRecordRepository Repozytorium do obsługi logów
+     * @param userRepository Repozytorium do obsługi użytkowników
+     * @param roleRepository Repozytorium do obsługi ról użytkowników
+     * @param passwordEncoder Enkoder haseł
+     */
     @Autowired
     public DataLoader2(WypozyczenieRepository wypRepository, KsiazkaRepository ksiazkaRepository,CzytelnikRepository czytelnikRepository
             ,MyLogRecordRepository myLogRecordRepository,UserRepository userRepository,RoleRepository roleRepository,PasswordEncoder passwordEncoder)
@@ -33,7 +49,12 @@ public class DataLoader2 implements ApplicationRunner {
         this.passwordEncoder=passwordEncoder;
     }
 
-
+    /**
+     * Metoda uruchamiana po starcie aplikacji, służy do ładowania przykładowych danych do bazy.
+     * Tworzy testowe logi, książki, czytelników, wypożyczenia, role i użytkowników.
+     *
+     * @param args Argumenty przekazywane do aplikacji
+     */
 
     public void run(ApplicationArguments args)
     {

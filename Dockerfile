@@ -1,6 +1,7 @@
 FROM openjdk:19
 COPY target/SpringBootProjekt.jar .
-EXPOSE 8081
+COPY KeyStore/keystore.jks ./KeyStore/keystore.jks
+EXPOSE 444
 CMD ["-jar", "SpringBootProjekt.jar"]
 ENTRYPOINT ["java"]
 

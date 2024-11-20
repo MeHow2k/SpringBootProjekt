@@ -25,12 +25,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-
+/**
+ * Konfiguracja bezpieczeństwa aplikacji.
+ * Zawiera definicję usług uwierzytelniania użytkowników, konfiguracji CORS, oraz zasad dostępu do różnych endpointów.
+ *
+ * @author Michał Pasieka
+ * @version 1.0, 20.11.2024
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-
+    /**
+     * Definiuje usługę pobierania danych użytkownika na podstawie nazwy użytkownika.
+     *
+     * @param userRepository repozytorium, które zapewnia dostęp do danych użytkowników
+     * @return użytkownik na podstawie nazwy użytkownika
+     * @throws UsernameNotFoundException gdy użytkownik o podanej nazwie nie istnieje
+     */
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> {
@@ -40,33 +52,45 @@ public class SecurityConfig {
                 throw new UsernameNotFoundException("User not found");
             }
 
-
             Set<DBRole> roles = user.getRoles();
 
             List<GrantedAuthority> authorities = new ArrayList<>();
             for (DBRole role : roles) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_"+role.getName()));
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
             }
 
-            return new org.springframework.security.core.userdetails.User(user.getUsername(),
-                    user.getPassword(), true, true, true, true, authorities);
+            return new org.springframework.security.core.userdetails.User(
+                    user.getUsername(),
+                    user.getPassword(),
+                    true, true, true, true, authorities);
         };
     }
 
+    /**
+     * Bean do enkodowania haseł użytkowników przy użyciu algorytmu BCrypt.
+     *
+     * @return enkoder do haseł użytkowników
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Bean odpowiedzialny za konfigurację zabezpieczeń aplikacji.
+     * Zawiera zasady autoryzacji dla różnych endpointów.
+     *
+     * @param http obiekt do konfiguracji zabezpieczeń aplikacji
+     * @return zbudowana konfiguracja zabezpieczeń
+     * @throws Exception gdy wystąpi błąd konfiguracji
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-
         http
                 .cors(withDefaults())  // Umożliwia obsługę CORS
                 .csrf(csrf -> csrf.disable()) // Wyłączanie CSRF dla prostoty, w produkcji powinno być włączone
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/info","/*.png","/login").permitAll()
+                        .requestMatchers("/", "/index.html", "/info", "/*.png", "/login").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/client/**").hasRole("CLIENT")
                         .anyRequest().authenticated()
@@ -76,8 +100,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Konfiguracja CORS (Cross-Origin Resource Sharing) dla aplikacji.
+     * Umożliwia dostęp do zasobów API z aplikacji frontendowej działającej na innym porcie.
+     *
+     * @return konfiguracja CORS
+     */
     @Bean
-    public WebMvcConfigurer corsConfigurer() { //Obsługa CORS
+    public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
@@ -88,5 +118,4 @@ public class SecurityConfig {
             }
         };
     }
-
 }
