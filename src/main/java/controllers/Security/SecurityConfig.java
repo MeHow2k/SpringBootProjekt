@@ -84,8 +84,6 @@ public class SecurityConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000") // Dostosuj to do adresu twojej aplikacji front-end
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .exposedHeaders("*")
                         .allowCredentials(true);
             }
         };

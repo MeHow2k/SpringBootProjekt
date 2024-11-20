@@ -12,9 +12,6 @@ import java.util.List;
 
 @Component
 public class DataLoader2 implements ApplicationRunner {
-
-
-
     private WypozyczenieRepository wypRepository;
     private KsiazkaRepository ksiazkaRepository;
     private CzytelnikRepository czytelnikRepository;
@@ -43,12 +40,26 @@ public class DataLoader2 implements ApplicationRunner {
         try
         {
 
-//            MyLogRecord myLogRecord = new MyLogRecord();
-//            myLogRecord.setMessage("Testowy log");
-//            myLogRecord.setTimestamp("1970-01-01 00:00:00");
-//            myLogRecord.setLevel("WARNING");
-//
-//            myLogRecordRepository.saveAndFlush(myLogRecord);
+            MyLogRecord myLogRecord = new MyLogRecord();
+            myLogRecord.setMessage("Testowy log");
+            myLogRecord.setTimestamp("1970-01-01 00:00:00");
+            myLogRecord.setLevel("WARNING");
+
+            myLogRecordRepository.saveAndFlush(myLogRecord);
+
+            MyLogRecord myLogRecord2 = new MyLogRecord();
+            myLogRecord2.setMessage("Testowy log2");
+            myLogRecord2.setTimestamp("2000-01-01 00:00:00");
+            myLogRecord2.setLevel("SEVERE");
+
+            myLogRecordRepository.saveAndFlush(myLogRecord2);
+
+            MyLogRecord myLogRecord3 = new MyLogRecord();
+            myLogRecord3.setMessage("Testowy log22");
+            myLogRecord3.setTimestamp("2024-01-01 00:00:00");
+            myLogRecord3.setLevel("INFO");
+
+            myLogRecordRepository.saveAndFlush(myLogRecord3);
 
 // Książki
             List<Ksiazka> ksiazki = Arrays.asList(
