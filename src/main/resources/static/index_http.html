@@ -63,7 +63,7 @@
     //dodanie wypozyczenia
                 if ((czytelnikId.length > 0) && (ksiazkaId.length > 0) && (date.length > 0)) {
                     
-                    await axios.post('https://localhost:444/client/addwyp',{
+                    await axios.post('http://localhost:8081/client/addwyp',{
                     params: {czytelnikId, ksiazkaId, date}, // Podajemy parametry
                 },
                 {
@@ -95,7 +95,7 @@ if(isLoggedIn){
             if ((firstname.length > 0) && (lastname.length > 0) ) {
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64
-                await axios.post('https://localhost:444/client/addczytelnik',
+                await axios.post('http://localhost:8081/client/addczytelnik',
                     {params: {firstname, lastname},
                 },
             {
@@ -128,7 +128,7 @@ if(isLoggedIn){
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64
 
-                await axios.post('https://localhost:444/client/addksiazka',
+                await axios.post('http://localhost:8081/client/addksiazka',
                     { params: {title, author,isbn},
                 },
             {
@@ -155,7 +155,7 @@ if(isLoggedIn){
         async function getCzytelnicy() {
             if(isLoggedIn){
             const credentials = {username: userName, password: password};
-            await axios.get('https://localhost:444/client/getczytelnicy',{
+            await axios.get('http://localhost:8081/client/getczytelnicy',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -200,7 +200,7 @@ if(isLoggedIn){
         async function getKsiazki() {
             if(isLoggedIn){
             const credentials = {username: userName, password: password};
-            await axios.get('https://localhost:444/client/getksiazki',{
+            await axios.get('http://localhost:8081/client/getksiazki',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -244,7 +244,7 @@ if(isLoggedIn){
             if(isLoggedIn){
             const credentials = { username: userName, password: password};
 
-            await axios.get('https://localhost:444/client/getwyp',{
+            await axios.get('http://localhost:8081/client/getwyp',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -292,7 +292,7 @@ if(isLoggedIn){
         async function getLogi() {
             if(isLoggedIn){
             const credentials = { username: userName, password: password};
-await axios.get('https://localhost:444/admin/getlogs',{
+await axios.get('http://localhost:8081/admin/getlogs',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -336,7 +336,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
         async function getReturnedWypozyczenia() {
             if(isLoggedIn){
             const credentials = { username: userName, password: password};
-            await axios.get('https://localhost:444/client/getreturnedwyp',{
+            await axios.get('http://localhost:8081/client/getreturnedwyp',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -384,7 +384,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
         async function getUnreturnedWypozyczenia() {
             if(isLoggedIn){
             const credentials = { username: userName, password: password};
-            await axios.get('https://localhost:444/client/getunreturnedwyp',{
+            await axios.get('http://localhost:8081/client/getunreturnedwyp',{
                                 params: {},
                                 auth: credentials,
                                 headers: {
@@ -435,7 +435,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             if (czytidtodelete.length > 0) {
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('https://localhost:444/admin/deleteczytelnik',
+                await axios.post('http://localhost:8081/admin/deleteczytelnik',
                 { params: {czytidtodelete},
                 },
             {
@@ -465,7 +465,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             if (ksidtodelete.length > 0) {
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('https://localhost:444/admin/deleteksiazka',
+                await axios.post('http://localhost:8081/admin/deleteksiazka',
                 { params: {ksidtodelete},
                 },
             {
@@ -495,7 +495,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             if (wypidtodelete.length > 0) {
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('https://localhost:444/admin/deletewyp',
+                await axios.post('http://localhost:8081/admin/deletewyp',
                     { params: {wypidtodelete},
                 },
             {
@@ -525,7 +525,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             if (wypidtoend.length > 0) {
                 const credentials = `${userName}:${password}`;
                 const base64Credentials = btoa(credentials); // kodowanie na base64 
-                await axios.post('https://localhost:444/client/endwyp',
+                await axios.post('http://localhost:8081/client/endwyp',
                 { params: {wypidtoend},
                 },
             {
@@ -556,7 +556,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             let czytelnikidtofind = czytelnikIDToFind;
             if (czytelnikidtofind.length > 0) {
                 const credentials = { username: userName, password: password};
-                await axios.get('https://localhost:444/client/getczytelnikwyp',
+                await axios.get('http://localhost:8081/client/getczytelnikwyp',
                     {
                                 params: {czytelnikidtofind},
                                 auth: credentials,
@@ -613,7 +613,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             let ksiazkaidtofind = ksiazkaIDToFind;
             if (ksiazkaidtofind.length > 0) {
                 const credentials = { username: userName, password: password};
-                await axios.get('https://localhost:444/client/getksiazkawyp',
+                await axios.get('http://localhost:8081/client/getksiazkawyp',
                     { 
                                 params: {ksiazkaidtofind },
                                 auth: credentials,
@@ -670,7 +670,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             let logstringtofind = newFindLogText;
 
             const credentials = { username: userName, password: password};
-                await axios.get('https://localhost:444/admin/getlogsbystring',
+                await axios.get('http://localhost:8081/admin/getlogsbystring',
                     { params: {logstringtofind},
                                 auth: credentials,
                                 headers: {
@@ -718,7 +718,7 @@ await axios.get('https://localhost:444/admin/getlogs',{
             let logenddate = newFindLogEndDate;
 
             const credentials = { username: userName, password: password};
-                await axios.get('https://localhost:444/admin/getlogbydate',
+                await axios.get('http://localhost:8081/admin/getlogbydate',
                     {params: { logstringtofind, logbegindate, logenddate},
                                 auth: credentials,
                                 headers: {
