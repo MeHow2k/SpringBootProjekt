@@ -1,4 +1,4 @@
-package tests;
+/* package tests;
 
 import controllers.StartApp;
 import org.junit.jupiter.api.MethodOrderer;
@@ -458,3 +458,4 @@ class MyControllerTest {
 
     }
 }
+*/

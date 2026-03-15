@@ -1,8 +1,10 @@
-FROM openjdk:19
-COPY target/SpringBootProjekt.jar .
-COPY KeyStore/keystore.jks ./KeyStore/keystore.jks
+FROM eclipse-temurin:19-jdk
+
+WORKDIR /app
+
+COPY target/SpringBootProjekt.jar app.jar
+COPY KeyStore/keystore.jks KeyStore/keystore.jks
+
 EXPOSE 444
-CMD ["-jar", "SpringBootProjekt.jar"]
-ENTRYPOINT ["java"]
 
-
+ENTRYPOINT ["java","-jar","app.jar"]
